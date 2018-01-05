@@ -62,7 +62,7 @@ PUT test
    }
 }
 
-PUT
+POST test/test
 {
    "text_3" : "foo dog cat",
    "text_2" : "foo dog cat",
@@ -71,32 +71,32 @@ PUT
 
 GET test/_search
 
-GET
+GET test/test/_search
 {
    "query" : {
       "match" : {
          "text_1" : "bar"
       }
    },
-   "explain" : 1
+   "explain" : true
 }
 
-GET
+GET test/test/_search
 {
    "query" : {
       "match" : {
          "text_2" : "bar"
       }
    },
-   "explain" : 1
+   "explain" : true
 }
 
-GET
+GET test/test/_search
 {
    "query" : {
       "match" : {
          "text_3" : "bar"
       }
    },
-   "explain" : 1
+   "explain" : true
 }
