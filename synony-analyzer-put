@@ -61,3 +61,42 @@ PUT test
       }
    }
 }
+
+PUT
+{
+   "text_3" : "foo dog cat",
+   "text_2" : "foo dog cat",
+   "text_1" : "foo dog cat"
+}
+
+GET test/_search
+
+GET
+{
+   "query" : {
+      "match" : {
+         "text_1" : "bar"
+      }
+   },
+   "explain" : 1
+}
+
+GET
+{
+   "query" : {
+      "match" : {
+         "text_2" : "bar"
+      }
+   },
+   "explain" : 1
+}
+
+GET
+{
+   "query" : {
+      "match" : {
+         "text_3" : "bar"
+      }
+   },
+   "explain" : 1
+}
