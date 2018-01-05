@@ -1,0 +1,63 @@
+PUT test
+{
+   "settings" : {
+      "analysis" : {
+         "filter" : {
+            "synonyms_expand" : {
+               "synonyms" : [
+                  "foo,bar,baz"
+               ],
+               "type" : "synonym"
+            },
+            "synonyms_contract" : {
+               "expand" : false,
+               "synonyms" : [
+                  "foo,bar,baz"
+               ],
+               "type" : "synonym"
+            }
+         },
+         "analyzer" : {
+            "synonyms_expand" : {
+               "filter" : [
+                  "standard",
+                  "lowercase",
+                  "stop",
+                  "synonyms_expand"
+               ],
+               "type" : "custom",
+               "tokenizer" : "standard"
+            },
+            "synonyms_contract" : {
+               "filter" : [
+                  "standard",
+                  "lowercase",
+                  "stop",
+                  "synonyms_contract"
+               ],
+               "type" : "custom",
+               "tokenizer" : "standard"
+            }
+         }
+      }
+   },
+   "mappings" : {
+      "test" : {
+         "properties" : {
+            "text_1" : {
+               "type" : "text",
+               "analyzer" : "synonyms_expand"
+            },
+            "text_2" : {
+               "search_analyzer" : "standard",
+               "analyzer" : "synonyms_expand",
+               "type" : "text"
+            },
+            "text_3" : {
+               "type" : "text",
+               "analyzer" : "synonyms_contract"
+            }
+         }
+      }
+   }
+}
