@@ -27,7 +27,7 @@ require([
 
         // 커서 이전 블록 검색
         for (var i = pos; i > -1; i--) {
-            line = arr[i]
+            line = arr[i].toUpperCase()
             if (line.indexOf('GET') > -1 ||
                 line.indexOf('PUT') > -1 ||
                 line.indexOf('POST') > -1 ||
@@ -41,7 +41,7 @@ require([
         // 커서 이후 블록 검색
         var isEmpty = true
         for (var i = pos; i < arr.length; i++) {
-            line = arr[i]
+            line = arr[i].toUpperCase()
             if (line.indexOf('GET') > -1 ||
                 line.indexOf('PUT') > -1 ||
                 line.indexOf('POST') > -1 ||
@@ -72,11 +72,17 @@ require([
             return null
         }
 
-        var query = block.arr.slice(block.bpos, block.epos + 1).join('\n')
+        if (block.bpos === block.epos) {
+            block.epos += 1
+        }
+        var query = block.arr.slice(block.bpos, block.epos).join('\n')
         console.log('query', query)
         query = query.replace(/[\n\r]+/g, ' ');
 
         var arr = query.split(' ')
+        if (arr.length < 2) {
+            return null
+        }
         var bpos = query.indexOf('{')
         var data = ""
         if (bpos > 0) {
@@ -124,7 +130,7 @@ require([
     editor2.$blockScrolling = Infinity
 
     editor1.session.on('change', function (delta) {
-        console.log('changed', delta)
+        //console.log('changed', delta)
     })
 
     var keyboardHandler = new HashHandler.HashHandler();
