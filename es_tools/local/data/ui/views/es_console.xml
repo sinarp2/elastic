@@ -1,0 +1,8 @@
+<dashboard script="js/es_console/app.js" stylesheet="split.css">
+    <label>ES Console</label>
+    <description></description>
+    <row>
+        <html src="html/es_console/index.html">
+        </html>
+    </row>
+</dashboard>

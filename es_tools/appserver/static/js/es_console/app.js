@@ -1,7 +1,7 @@
 require.config({
     paths: {
-        split: "../app/es_tools/js/",
-        ace: "../app/es_tools/js/es_console/ace/"
+        split: "../app/Clay/js",
+        ace: "../app/Clay/js/es_console/ace"
     }
 });
 
@@ -17,6 +17,10 @@ require([
     ace,
     HashHandler
 ) {
+
+    var esapi = "/custom/Clay/estools/esapi"
+
+    var canStore = false
 
     var getQueryBlock = function (text, pos) {
         var arr, line, bpos, epos
@@ -88,6 +92,7 @@ require([
         if (bpos > 0) {
             data = query.substring(bpos)
         }
+
         return {
             "method": arr[0],
             "uri": arr[1],
@@ -101,7 +106,7 @@ require([
             editor2.setValue("", -1)
             return
         }
-        $.get("/dj/es_tools/esapi", query, function (data, status, xhr) {
+        $.get(esapi, query, function (data, status, xhr) {
             console.log('status', xhr.status)
             try {
                 var jobj = JSON.parse(data);
@@ -129,14 +134,33 @@ require([
     editor1.$blockScrolling = Infinity
     editor2.$blockScrolling = Infinity
 
-    editor1.session.on('change', function (delta) {
-        //console.log('changed', delta)
+    editor1.session.on('change', function (delta, esess) {
+        // console.log('changed', esess.getValue())
+        if (canStore) {
+            localStorage.setItem('history', esess.getValue())
+        }
     })
 
     var keyboardHandler = new HashHandler.HashHandler();
-    keyboardHandler.bindKeys({
-        "Command-Return": call_api
-    })
+    var ua = window.navigator.userAgent.toUpperCase();
+    console.log('ua', ua)
+    if (ua.indexOf("MAC OS X")) {
+        keyboardHandler.bindKeys({
+            "Command-Return": call_api
+        })
+    } else {
+        keyboardHandler.bindKeys({
+            "Ctrl-Enter": call_api
+        })
+    }
     editor1.keyBinding.addKeyboardHandler(keyboardHandler)
+
+    if (typeof(Storage) !== "undefined") {
+        canStore = true
+        //console.log('localstorage', localStorage.history)
+        editor1.setValue(localStorage.history, -1)
+    } else {
+        canStore = false
+    }
 
 })
