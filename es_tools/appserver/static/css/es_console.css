@@ -52,16 +52,17 @@ html, body {
     float: left;
 }
 
-.tooltiptext {
-    visibility: visible;
-    width: 120px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-
+.floating-menu {
+    padding: 0px;
     /* Position the tooltip */
     position: absolute;
     z-index: 1;
+}
+
+.exec-query {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADvSURBVEiJ7ZKxSgNBFEXPS0LATtLbBKzCugRl/yG1BPwCKxGnEqxSisUipMtXWCR1IIUYNpElaCc2dnYpRIRlXoqkje6sTJU99b33zIOBkhKAcG76rddevUi3kiekykX1e/kUJKbpRbChLUISJFcdXwKAhoiMwpm5RXu5uq4CAFG4PnpeDluPpuFDsEbpVOukYWIiP4I1BypMgrk59yUAECxbv3Dtn+PvFaunaXSfbgsUvkCQh70sa/82DsUusIrcLI7jOwT9K+wq+BTkbHESj/MWXARTa6X7EsUfLi/KJRBl8LWfXb4d9n9cxkt2hBVJkD98s6ST7QAAAABJRU5ErkJggg==);
+    background-position: -4px -4px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }
