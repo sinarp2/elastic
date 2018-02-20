@@ -141,24 +141,31 @@ require([
         }
     })
 
-    var keyboardHandler = new HashHandler.HashHandler();
-    var ua = window.navigator.userAgent.toUpperCase();
-    console.log('ua', ua)
-    if (ua.indexOf("MAC OS X")) {
-        keyboardHandler.bindKeys({
-            "Command-Return": call_api
-        })
-    } else {
-        keyboardHandler.bindKeys({
-            "Ctrl-Enter": call_api
-        })
-    }
-    editor1.keyBinding.addKeyboardHandler(keyboardHandler)
+    // var keyboardHandler = new HashHandler.HashHandler();
+    // var ua = window.navigator.userAgent.toUpperCase();
+    // console.log('ua', ua)
+    // if (ua.indexOf("MAC OS X")) {
+    //     keyboardHandler.bindKeys({
+    //         "Command-Return": call_api
+    //     })
+    // } else {
+    //     keyboardHandler.bindKeys({
+    //         "Ctrl-Enter": call_api
+    //     })
+    // }
+    // editor1.keyBinding.addKeyboardHandler(keyboardHandler)
+    editor1.commands.addCommand({
+        name: "executeQuery",
+        bindKey: {win: "Ctrl-Enter", mac: "Command-Return"},
+        exec: call_api
+    })
 
     if (typeof(Storage) !== "undefined") {
         canStore = true
         //console.log('localstorage', localStorage.history)
-        editor1.setValue(localStorage.history, -1)
+        if (localStorage.history) {
+            editor1.setValue(localStorage.history, -1)
+        }
     } else {
         canStore = false
     }
