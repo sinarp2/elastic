@@ -1,0 +1,514 @@
+<div class="search-bar-wrapper shared-searchbar">
+    <form method="get" action="" class="search-form">
+        <table class="search-bar">
+            <tbody>
+                <tr>
+                    <td class="search-input" width="100%">
+                        <div class="search-bar-input shared-searchbarinput">
+                            <div class="search-field-wrapper shared-searchbarinput-searchfield">
+                                <pre class="ace_editor ace-spl-light" style="height: 20px;">
+                                </pre>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="search-apps"></td>
+                    <td class="search-timerange">
+                        <div class="btn-group shared-timerangepicker">
+                            <a class="splBorder splBorder-nsew splBackground-primary btn" href="#">
+                                <span class="time-label" title="Last 24 hours">Last 24 hours</span>
+                                <span class="caret"></span>
+                            </a>
+                            <!-- Calendar Popup -->
+                            <div class="popdown-dialog" style="margin-left:-545px;">
+                                <div class="arrow" style="margin-left: 216px;"></div>
+                                <div class="accordion view-new-time-range-picker-dialog shared-timerangepicker-dialog">
+                                    <div class="accordion-group">
+                                        <div class="accordion-heading">
+                                            <a class="accordion-toggle" href="#">
+                                                <i class="icon-accordion-toggle icon-triangle-right-small"></i>Presets </a>
+                                        </div>
+                                        <div class="accordion-body" style="display: none;">
+                                            <div class="accordion-inner presets-container shared-timerangepicker-dialog-presets">
+                                                <ul class="unstyled presets-group">
+                                                    <li>Real-time</li>
+                                                    <li>
+                                                        <a href="#" data-earliest="rt-30s" data-latest="rt">30 second window</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="rt-1m" data-latest="rt">1 minute window</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="rt-5m" data-latest="rt">5 minute window</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="rt-30m" data-latest="rt">30 minute window</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="rt-1h" data-latest="rt">1 hour window</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="rt" data-latest="rt">All time (real-time)</a>
+                                                    </li>
+                                                </ul>
+                                                <div class="presets-divider-wrap">
+                                                    <div class="presets-divider"></div>
+                                                </div>
+                                                <ul class="unstyled presets-group">
+                                                    <li>Relative</li>
+                                                    <li>
+                                                        <a href="#" data-earliest="@d" data-latest="now">Today</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="@w0" data-latest="now">Week to date</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="@w1" data-latest="now">Business week to date</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="@mon" data-latest="now">Month to date</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="@y" data-latest="now">Year to date</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-1d@d" data-latest="@d">Yesterday</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-7d@w0" data-latest="@w0">Previous week</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-6d@w1" data-latest="-1d@w6">Previous business week</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-1mon@mon" data-latest="@mon">Previous month</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-1y@y" data-latest="@y">Previous year</a>
+                                                    </li>
+                                                </ul>
+                                                <ul class="unstyled presets-group">
+                                                    <li>&nbsp;</li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-15m" data-latest="now">Last 15 minutes</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-60m@m" data-latest="now">Last 60 minutes</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-4h@m" data-latest="now">Last 4 hours</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-24h@h" data-latest="now">Last 24 hours</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-7d@h" data-latest="now">Last 7 days</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="#" data-earliest="-30d@d" data-latest="now">Last 30 days</a>
+                                                    </li>
+                                                </ul>
+                                                <div class="presets-divider-wrap">
+                                                    <div class="presets-divider"></div>
+                                                </div>
+                                                <ul class="unstyled presets-group">
+                                                    <li>Other</li>
+                                                    <li>
+                                                        <a href="#" data-earliest="0" data-latest="">All time</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-group">
+                                        <div class="accordion-heading">
+                                            <a class="accordion-toggle" href="#">
+                                                <i class="icon-accordion-toggle icon-triangle-right-small"></i>Relative </a>
+                                        </div>
+                                        <div class="accordion-body" style="display: none;">
+                                            <div class="accordion-inner relative-time-container form shared-timerangepicker-dialog-relative">
+                                                <div class="alerts shared-flashmessages" style="display: none;"> </div>
+                                                <div class="control-group col-1 timeinput earliest">
+                                                    <label for="earliest_view25371" class="control-label" title="Earliest:">Earliest:</label>
+                                                    <div class="controls">
+                                                        <div class="input-append">
+                                                            <input type="text" id-"earliest_view25371" size="5" value="24" class="earliest_input timerangepicker-relative-earliest-time">
+                                                            <div class="btn-group timerangepicker-relative_range_unit shared-controls-syntheticselectcontrol control-default">
+                                                                <a class="dropdown-toggle es_btn" href="#">
+                                                                    <i class="icon-large"></i>
+                                                                    <span class="link-label"> Hours Ago</span>
+                                                                    <span class="caret"></span>
+                                                                </a>
+                                                                <div class="dropdown-menu dropdown-menu-selectable dropdown-menu-default dropdown-menu-narrow open">
+                                                                    <div class="arrow"></div>
+                                                                    <ul class="dropdown-menu-main">
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="0" data-item-value="s">
+                                                                                <i class="icon-check" style="display: none;"></i>
+                                                                                <span class="link-label">Seconds Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="1" data-item-value="m">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Minutes Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="2" data-item-value="h">
+                                                                                <i class="icon-check" style=""></i>
+                                                                                <span class="link-label">Hours Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="3" data-item-value="d">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Days Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="4" data-item-value="w">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Weeks Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="5" data-item-value="mon">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Months Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="6" data-item-value="q">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Quarters Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="7" data-item-value="y">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Years Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                    <div class="dropdown-footer"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <label for="earliest_no_snap_to_view25371" class="radio">
+                                                            <input type="radio" name="earliest_snap" class="earliest_snap" id="earliest_no_snap_to_view25371" value="0" checked="checked"> No Snap-to
+                                                        </label>
+                                                        <label class="earliest_snap_label radio" for="earliest_snap_to_view25371">
+                                                            <input type="radio" name="earliest_snap" class="earliest_snap" id="earliest_snap_to_view25371" value="1">
+                                                            <span class="text">Beginning of hour</span>
+                                                        </label>
+
+                                                        <span id="earliest_hint_view25371" class="help-block help-block-timestamp">2/19/18 6:23:38.000 PM </span>
+                                                    </div>
+                                                </div>
+                                                <!-- /.control-group -->
+
+                                                <div class="control-group col-2 timeinput latest">
+                                                    <label class="control-label" for="view25371" title="Latest:">Latest:</label>
+                                                    <div class="controls">
+                                                        <label for="latest_no_snap_to_view25371" class="radio">
+                                                            <input type="radio" name="latest_snap" class="latest_snap" id="latest_no_snap_to_view25371" value="0" checked="checked"> Now
+                                                        </label>
+                                                        <label class="latest_snap_label radio" for="latest_snap_to_view25371">
+                                                            <input type="radio" name="latest_snap" class="latest_snap" id="latest_snap_to_view25371" value="1">
+                                                            <span class="text">Beginning of current hour</span>
+                                                        </label>
+
+                                                        <span id="latest_hint_view25371" class="help-block help-block-timestamp">2/20/18 6:00:00.000 PM </span>
+                                                    </div>
+                                                </div>
+                                                <!-- /.control-group -->
+
+                                                <button class="apply es_btn">Apply</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-group">
+                                        <div class="accordion-heading">
+                                            <a class="accordion-toggle" href="#">
+                                                <i class="icon-accordion-toggle icon-triangle-right-small"></i>Real-time </a>
+                                        </div>
+                                        <div class="accordion-body" style="display: none;">
+                                            <div class="accordion-inner form real-time-container shared-timerangepicker-dialog-realtime">
+                                                <div class="alerts shared-flashmessages" style="display: none;"> </div>
+                                                <div class="control-group col-1 timeinput earliest">
+                                                    <label class="control-label" for="earliest_view25398" title="Earliest:">Earliest:</label>
+                                                    <div class="controls">
+                                                        <div class="input-append">
+                                                            <input type="text" size="5" value="24" class="earliest_input timerangepicker-real-time-earliest-time" id="earliest_view25398">
+                                                            <div class="btn-group timerangepicker-realtime_range_type shared-controls-syntheticselectcontrol control-default">
+                                                                <a class="dropdown-toggle es_btn" href="#">
+                                                                    <i class=" icon-large"></i>
+                                                                    <span class="link-label"> Hours Ago</span>
+                                                                    <span class="caret"></span>
+                                                                </a>
+                                                                <div class="dropdown-menu dropdown-menu-selectable dropdown-menu-default  dropdown-menu-narrow ">
+                                                                    <div class="arrow"></div>
+                                                                    <ul class="dropdown-menu-main">
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="0" data-item-value="s">
+                                                                                <i class="icon-check" style="display: none;"></i>
+                                                                                <span class="link-label">Seconds Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="1" data-item-value="m">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Minutes Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="2" data-item-value="h">
+                                                                                <i class="icon-check" style=""></i>
+                                                                                <span class="link-label">Hours Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="3" data-item-value="d">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Days Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="4" data-item-value="w">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Weeks Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="5" data-item-value="mon">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Months Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="6" data-item-value="q">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Quarters Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <a class="synthetic-select " href="#" data-item-idx="7" data-item-value="y">
+                                                                                <i class="icon-check" style="display:none"></i>
+                                                                                <span class="link-label">Years Ago</span>
+                                                                            </a>
+                                                                        </li>
+                                                                    </ul>
+                                                                    <div class="dropdown-footer"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <span id="hint_view25398" class="help-block help-block-timestamp">2/19/18 5:48:41.000 PM </span>
+                                                    </div>
+                                                </div>
+                                                <div class="control-group col-2 timeinput latest">
+                                                    <label class="control-label" title="Latest:">Latest:</label>
+                                                    <div class="controls">
+                                                        <span class="form-value uneditable-input">now</span>
+                                                    </div>
+                                                </div>
+                                                <button class="apply es_btn pull-left">Apply</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-group">
+                                        <div class="accordion-heading">
+                                            <a class="accordion-toggle" href="#">
+                                                <i class="icon-accordion-toggle icon-triangle-right-small"></i>Date Range </a>
+                                        </div>
+                                        <div class="accordion-body" style="display: none;">
+                                            <div class="accordion-inner form date-container shared-timerangepicker-dialog-dateandtimerange">
+                                                <div class="alerts shared-flashmessages" style="display: none;"> </div>
+                                                <div class="timerangepicker-range-type shared-controls-syntheticselectcontrol control-default">
+                                                    <a class="dropdown-toggle es_btn" href="#">
+                                                        <i class=" icon-large"></i>
+                                                        <span class="link-label"> Between</span>
+                                                        <span class="caret"></span>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-selectable dropdown-menu-default  dropdown-menu-narrow ">
+                                                        <div class="arrow"></div>
+                                                        <ul class="dropdown-menu-main">
+                                                            <li>
+                                                                <a class="synthetic-select " href="#" data-item-idx="0" data-item-value="between_dates">
+                                                                    <i class="icon-check" style="display: inline;"></i>
+                                                                    <span class="link-label">Between</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="synthetic-select " href="#" data-item-idx="1" data-item-value="before_date">
+                                                                    <i class="icon-check" style="display:none"></i>
+                                                                    <span class="link-label">Before</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="synthetic-select " href="#" data-item-idx="2" data-item-value="after_date">
+                                                                    <i class="icon-check" style="display:none"></i>
+                                                                    <span class="link-label">Since</span>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                        <div class="dropdown-footer"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="form form-inline date-range-container">
+                                                    <div data-cid="view25447" class="shared-timerangepicker-dialog-dateandtimerange-rangepicker">
+                                                        <div class="time-between-dates">
+                                                            <div class="earliest_picker col-1" style="display: block;">
+                                                                <span class="control shared-controls-datecontrol control-default">
+                                                                    <input type="text" class="mdy-input timerangepicker-earliest-date hasDatepicker" value="" id="dp1519116191951"> </span>
+                                                                <span class="help-block">00:00:00</span>
+                                                            </div>
+                                                            <label class="and control-label" style="display: block;">and</label>
+                                                            <div class="help-block up-to-now" style="display: none;">(up to now)</div>
+                                                            <div class="latest_picker col-2" style="display: block;">
+                                                                <span class="control shared-controls-datecontrol control-default">
+                                                                    <input type="text" class="mdy-input timerangepicker-latest-date hasDatepicker" value="" id="dp1519116191952"> </span>
+                                                                <span class="help-block help-time">24:00:00</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button class="apply es_btn">Apply</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-group">
+                                        <div class="accordion-heading">
+                                            <a class="accordion-toggle" href="#">
+                                                <i class="icon-accordion-toggle icon-triangle-right-small"></i>Date &amp; Time Range </a>
+                                        </div>
+                                        <div class="accordion-body" style="display: none;">
+                                            <div class="accordion-inner form dateandtime-container shared-timerangepicker-dialog-dateandtimerange">
+                                                <div class="alerts shared-flashmessages" style="display: none;"> </div>
+                                                <div class="timerangepicker-range-type shared-controls-syntheticselectcontrol control-default">
+                                                    <a class="dropdown-toggle es_btn" href="#">
+                                                        <i class=" icon-large"></i>
+                                                        <span class="link-label"> Between</span>
+                                                        <span class="caret"></span>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-selectable dropdown-menu-default  dropdown-menu-narrow ">
+                                                        <div class="arrow"></div>
+                                                        <ul class="dropdown-menu-main">
+                                                            <li>
+                                                                <a class="synthetic-select " href="#" data-item-idx="0" data-item-value="between_dates">
+                                                                    <i class="icon-check" style="display: inline;"></i>
+                                                                    <span class="link-label">Between</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="synthetic-select " href="#" data-item-idx="1" data-item-value="before_date">
+                                                                    <i class="icon-check" style="display:none"></i>
+                                                                    <span class="link-label">Before</span>
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="synthetic-select " href="#" data-item-idx="2" data-item-value="after_date">
+                                                                    <i class="icon-check" style="display:none"></i>
+                                                                    <span class="link-label">Since</span>
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                        <div class="dropdown-footer"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="form form-inline date-range-container">
+                                                    <div data-cid="view25479" class="shared-timerangepicker-dialog-dateandtimerange-rangepicker">
+                                                        <div class="time-between-dates">
+                                                            <div class="earliest_picker col-1" style="display: block;">
+                                                                <span class="timeinput shared-timerangepicker-dialog-dateandtimerange-timeinput timerangepicker-earliest">
+                                                                    <span class="time-mdy">
+                                                                        <span class="control pull-left shared-controls-datecontrol control-default">
+                                                                            <input type="text" class="mdy-input timerangepicker-earliest hasDatepicker" value="" id="dp1519116191953"> </span>
+                                                                    </span>
+                                                                    <span class="time-hms">
+                                                                        <span class="view-time-range-picker-time-and-date-range-hours-minutes-seconds pull-left shared-timerangepicker-dialog-dateandtimerange-timeinput-hoursminutesseconds">
+                                                                            <input type="text" class="hms-input" value="12:00:00.000">
+                                                                            <span class="help-block">HH:MM:SS.SSS</span>
+                                                                        </span>
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                            <label class="and control-label" style="display: block;">and</label>
+                                                            <div class="help-block up-to-now" style="display: none;">(up to now)</div>
+                                                            <div class="latest_picker col-2" style="display: block;">
+                                                                <span class="timeinput shared-timerangepicker-dialog-dateandtimerange-timeinput timerangepicker-latest">
+                                                                    <span class="time-mdy">
+                                                                        <span class="control pull-left shared-controls-datecontrol control-default">
+                                                                            <input type="text" class="mdy-input timerangepicker-latest hasDatepicker" value="" id="dp1519116191954"> </span>
+                                                                    </span>
+                                                                    <span class="time-hms">
+                                                                        <span class="view-time-range-picker-time-and-date-range-hours-minutes-seconds pull-left shared-timerangepicker-dialog-dateandtimerange-timeinput-hoursminutesseconds"
+                                                                            data-cid="view25487" data-view="views/shared/timerangepicker/dialog/dateandtimerange/timeinput/HoursMinutesSeconds"
+                                                                            data-render-time="0.001">
+                                                                            <input type="text" class="hms-input" value="12:00:00.000">
+                                                                            <span class="help-block">HH:MM:SS.SSS</span>
+                                                                        </span>
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button class="apply es_btn">Apply</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-group">
+                                        <div class="accordion-heading">
+                                            <a class="accordion-toggle" href="#">
+                                                <i class="icon-accordion-toggle icon-triangle-right-small"></i>Advanced </a>
+                                        </div>
+                                        <div class="accordion-body" style="display: none;">
+                                            <div class="accordion-inner form advanced-container shared-timerangepicker-dialog-advanced">
+                                                <div class="alerts shared-flashmessages" style="display: none;"> </div>
+                                                <div class="timeinput pull-left shared-timerangepicker-dialog-advanced-timeinput earliest">
+                                                    <div class="time-advanced">
+                                                        <label class="control-label" for="view25501" title="Earliest:">Earliest:</label>
+                                                        <div class="controls">
+                                                            <input type="text" size="18" value="-24h@h" id="view25501">
+                                                            <span id="hint_view25501" class="help-block help-block-timestamp">
+                                                                <span class="shared-timerangepicker-dialog-advanced-timeinput-hint">
+                                                                    2/19/18 6:00:00.000 PM </span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="timeinput pull-left shared-timerangepicker-dialog-advanced-timeinput latest">
+                                                    <div class="time-advanced">
+                                                        <label class="control-label" for="view25505" title="Latest:">Latest:</label>
+                                                        <div class="controls">
+                                                            <input type="text" size="18" value="now" id="view25505">
+                                                            <span id="hint_view25505" class="help-block help-block-timestamp">
+                                                                <span class="shared-timerangepicker-dialog-advanced-timeinput-hint">
+                                                                    2/20/18 6:23:47.000 PM </span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button class="apply es_btn" id="apply_view25488">Apply</button>
+                                                <a href="/en-US/help?location=learnmore.timerange.picker" target="_blank" title="Splunk help" class="btn-documentation">Documentation
+                                                    <i class="icon-external"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="search-button">
+                        <a class="btn" href="#">
+                            <i class="icon-search-thin"></i>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+</div>
+<div style="height:1080px;"></div>

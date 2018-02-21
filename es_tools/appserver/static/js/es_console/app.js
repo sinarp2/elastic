@@ -1,7 +1,7 @@
 require.config({
     paths: {
         split: "../app/Clay/js",
-        ace: "../app/Clay/js/es_console/ace"
+        ace: "../app/Clay/js/ace"
     }
 });
 
@@ -9,13 +9,11 @@ require([
     "jquery",
     'split/split.min',
     "ace/ace",
-    "ace/keyboard/hash_handler",
     'splunkjs/mvc/simplexml/ready!'
 ], function (
     $,
     Split,
-    ace,
-    HashHandler
+    ace
 ) {
 
     var esapi = "/custom/Clay/estools/esapi"
