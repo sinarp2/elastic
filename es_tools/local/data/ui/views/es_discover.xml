@@ -1,0 +1,9 @@
+<dashboard script="js/es_discover/app.js" stylesheet="css/es_discover.css">
+  <label> ES Search</label>
+  <row>
+    <panel>
+      <html src="html/es_discover.html">
+        </html>
+    </panel>
+  </row>
+</dashboard>

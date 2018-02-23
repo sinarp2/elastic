@@ -62,3 +62,7 @@ body {
 .popdown-dialog:focus {
     outline: none;
 }
+
+.panel-body.html {
+    padding: 0px !important;
+}

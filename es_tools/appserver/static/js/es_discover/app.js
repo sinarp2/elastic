@@ -1,29 +1,35 @@
 require.config({
     paths: {
+        es: "../app/Clay/js/es_discover",
         ace: "../app/Clay/js/ace"
     }
-});
+})
 
 require([
     "jquery",
+    "es/timerange",
     "ace/ace",
     'splunkjs/mvc/simplexml/ready!'
 ], function (
     $,
+    timerangedlg,
     ace
 ) {
 
-    $('.dashboard-title').prepend('<i class="icon-search-thin"></i>')
+    console.log('app.js')
+    timerangedlg.setParent('.shared-timerangepicker')
 
     var esapi = "/custom/Clay/estools/esapi"
     var canStore = false
-    var timerange = null
 
     var editor = ace.edit($(".ace_editor").get(0), {
         mode: "ace/mode/text"
     })
 
-    function init() {
+    setupEditor()
+    timerangedlg.init()
+
+    function setupEditor() {
 
         editor.setValue('', -1)
         editor.setShowPrintMargin(false)
@@ -44,9 +50,7 @@ require([
             exec: call_api
         })
 
-        editor.session.on('change', function (delta) {
-            resizeEditor()
-        })
+        editor.session.on('change', resizeEditor)
 
         editor.on('focus', function () {
             $('.ace_editor').addClass('focused')
@@ -63,74 +67,25 @@ require([
             if (localStorage.discover_history) {
                 editor.setValue(localStorage.discover_history, -1)
             }
-            if (sessionStorage.timerange) {
-                try {
-                    timerange = $.parseJSON(sessionStorage.getItem('timerange'))
-                } catch (e) {
-                    timerange = null
-                }
-            }
         } else {
             canStore = false
         }
 
         setInterval(saveQuery, 500, editor, canStore)
-
-        $('a.splBorder.btn').click(function (e) {
-            toggleCalendar()
-        })
-
-        $('.accordion-toggle').click(function (e) {
-            toggleAccordian($(e.target).closest('.accordion-group')[0])
-        })
-
-        $('.presets-group').find('a').click(function (e) {
-            setPresets(e.target)
-        })
-
-        $('.dropdown-toggle').click(function (e) {
-            toggleDropdown(e)
-        })
-
-        setTimeRangeTitle()
-
-        setCloseWindow()
     }
 
-    function setTimeRangeTitle() {
-        if (!timerange) {
-            timerange = {
-                idx: 0,
-                title: 'Last 24 hours',
-                data: {
-                    earliest: '-24h@h',
-                    latest: 'now'
-                }
-            }
-        }
-        $('.time-label').attr('title', timerange.title)
-        $('.time-label').text(timerange.title)
-        $($('.accordion-toggle')[timerange.idx]).click()
-        sessionStorage.setItem('timerange', JSON.stringify(timerange))
-    }
-
-    function setPresets(t) {
-        timerange = {
-            type: 'Presets',
-            idx: 0,
-            title: $(t).text(),
-            data: $(t).data()
-        }
-        setTimeRangeTitle()
-        toggleCalendar()
-    }
-
+    /*
+    * 검색창의 검색문장을 저장한다
+    */
     function saveQuery(editor, canStore) {
         if (canStore) {
             localStorage.setItem('discover_history', editor.getValue())
         }
     }
 
+    /*
+    * 검색창에서 줄바꿈이 일어나면 검색창 크기를 조정한다
+    */
     function resizeEditor() {
         var newHeight =
             editor.getSession().getScreenLength() *
@@ -141,83 +96,31 @@ require([
     }
 
     function call_api(editor) {
-        console.log('api call', editor.getValue())
-        return true
-    }
-
-    function toggleDropdown(e) {
-        var el = $(e.target).closest('.dropdown-toggle')
-        var dropdown = $(el).next('.dropdown-menu')
-        if (dropdown.hasClass('open')) {
-            dropdown.removeClass('open')
-        } else {
-            dropdown.addClass('open')
-        }
-    }
-
-    function toggleCalendar() {
-        var dlg = $('.popdown-dialog')
-        console.log('toggle', $(dlg).hasClass('open'))
-        if (dlg.hasClass('open')) {
-            dlg.removeClass('open')
-        } else {
-            dlg.addClass('open')
-        }
-    }
-
-    function toggleAccordian(group) {
-        if ($(group).hasClass('active')) {
+        var query = editor.getValue().trim()
+        query = query.replace(/[\n\r]+/g, ' ');
+        var arr = query.split(' ')
+        if (arr.length < 2) {
             return
         }
-        $('.accordion-group').removeClass('active')
-        $(group).addClass('active')
-        $('i.icon-accordion-toggle.icon-triangle-down-small')
-            .removeClass('icon-triangle-down-small')
-            .addClass('icon-triangle-right-small')
-        $(group).find('i.icon-accordion-toggle')
-            .removeClass('icon-triangle-right-small')
-            .addClass('icon-triangle-down-small')
-        $('.accordion-body').slideUp()
-        $(group).find('.accordion-body').slideDown()
-    }
+        var bpos = query.indexOf('{')
+        var data = ""
+        if (bpos > 0) {
+            data = query.substring(bpos)
+        }
+        var queryParam = {
+            "method": arr[0],
+            "uri": arr[1],
+            "data": data
+        }
+        $.get(esapi, queryParam, function (data, status, xhr) {
+            try {
+                var jobj = JSON.parse(data);
+                console.log('json', data)
 
-    function setCloseWindow() {
-        $(document).click(function (e) {
-            checkPopdownDialog(e)
-            var btns = $('.dropdown-toggle')
-            $('.dropdown-menu').each(function (idx) {
-                if ($(this).hasClass('open')) {
-                    checkDropdownMenu($(this), $(btns.get(idx)), e)
-                }
-            })
+            } catch (e) {
+                console.log('row text', data)
+            }
         })
-
-        function checkDropdownMenu(el1, el2, e) {
-            if (!isInbound(el1, e.pageX, e.pageY) && !isInbound(el2, e.pageX, e.pageY)) {
-                el1.removeClass('open')
-            }
-        }
-
-        function checkPopdownDialog(e) {
-            var el1 = $('.popdown-dialog')
-            if (!el1.hasClass('open')) {
-                return
-            }
-            var el2 = $('.search-timerange')
-            if (!isInbound(el1, e.pageX, e.pageY) && !isInbound(el2, e.pageX, e.pageY)) {
-                el1.removeClass('open')
-            }
-        }
-
-        function isInbound(el, x, y) {
-            if (x > el.offset().left && x < el.offset().left + el.width() &&
-                y > el.offset().top && y < el.offset().top + el.height()) {
-                return true
-            } else {
-                return false
-            }
-        }
     }
 
-    init()
 })
