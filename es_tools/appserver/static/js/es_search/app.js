@@ -1,23 +1,32 @@
 require.config({
     paths: {
-        es: "../app/Clay/js/es_discover",
-        ace: "../app/Clay/js/ace"
+        es: "../app/Clay/js/es_search",
+        ace: "../app/Clay/js/ace",
+        text: "../app/Clay/lib/text"
     }
 })
 
 require([
     "jquery",
     "es/timerange",
+    "es/eventview",
     "ace/ace",
+    "text!../app/Clay/html/es_search.html",
     'splunkjs/mvc/simplexml/ready!'
 ], function (
     $,
-    timerangedlg,
-    ace
+    TimerangeDlg,
+    EventView,
+    ace,
+    es_search,
+    es_eventview,
+    LayoutView
 ) {
 
-    console.log('app.js')
-    timerangedlg.setParent('.shared-timerangepicker')
+    $('.dashboard-title').prepend('<i class="icon-search-thin"></i> ')
+    $('.dashboard-body').css('min-height', 0)
+    $('.dashboard-body').css('padding', '0 20px')
+    $(es_search).insertAfter($('.dashboard-body'))
 
     var esapi = "/custom/Clay/estools/esapi"
     var canStore = false
@@ -27,7 +36,12 @@ require([
     })
 
     setupEditor()
-    timerangedlg.init()
+
+    var eventview = new EventView()
+    var timerangedlg = new TimerangeDlg('.shared-timerangepicker')
+    timerangedlg.addHandler('setTimerange', function () {
+        editor.focus()
+    })
 
     function setupEditor() {
 
@@ -116,6 +130,7 @@ require([
             try {
                 var jobj = JSON.parse(data);
                 console.log('json', data)
+                eventview.render('.tab-content').el
 
             } catch (e) {
                 console.log('row text', data)

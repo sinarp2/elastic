@@ -11,14 +11,31 @@ define([
 
     var canStore = false
     var timerange = null
+    var handlers = []
 
-    return {
-        init: init,
-        setParent: setParent
+    function TimerangeDlg(parentElement){
+        setUp(parentElement)
     }
 
-    function setParent(p) {
-        $(p).append(template)
+    TimerangeDlg.prototype.constructor = TimerangeDlg
+    TimerangeDlg.prototype.addHandler = addHandler
+
+    return TimerangeDlg;
+
+    function trigger(name, args) {
+        for (var i = 0; i < handlers.length; i++) {
+            if (handlers[i].name === name) {
+                handlers[i].handler.call(args)
+                break;
+            }
+        }
+    }
+
+    function addHandler(name, handler) {
+        handlers.push({
+            name: name,
+            handler: handler
+        })
     }
 
     function setTimeRangeTitle() {
@@ -47,12 +64,14 @@ define([
         }
         setTimeRangeTitle()
         toggleCalendar()
+        trigger('setTimerange')
     }
 
     /*
      * 가간 설정 창 내 dropdown 창을 열고 닫는다
      */
     function toggleDropdown(e) {
+        console.log('toggle')
         var el = $(e.target).closest('.dropdown-toggle')
         var dropdown = $(el).next('.dropdown-menu')
         if (dropdown.hasClass('open')) {
@@ -147,8 +166,8 @@ define([
         }
     }
 
-    function init() {
-
+    function setUp(parentElement) {
+        $(parentElement).append(template)
         $('a.splBorder.btn').on('click', toggleCalendar)
         $('.accordion-toggle').on('click', toggleAccordian)
         $('.presets-group').find('a').on('click', setPresets)
