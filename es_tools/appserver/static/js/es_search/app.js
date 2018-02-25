@@ -37,7 +37,7 @@ require([
 
     setupEditor()
 
-    var eventview = new EventView()
+    var eventview = new EventView('.tab-content')
     var timerangedlg = new TimerangeDlg('.shared-timerangepicker')
     timerangedlg.addHandler('setTimerange', function () {
         editor.focus()
@@ -129,10 +129,12 @@ require([
         $.get(esapi, queryParam, function (data, status, xhr) {
             try {
                 var jobj = JSON.parse(data);
-                console.log('json', data)
-                eventview.render('.tab-content').el
+                if (jobj.hits) {
+                    eventview.render(jobj.hits.hits)
+                }
 
             } catch (e) {
+                console.log('err', e)
                 console.log('row text', data)
             }
         })

@@ -1,61 +1,41 @@
 require.config({
     paths: {
-        split: "../app/Clay/js",
         text: "../app/Clay/lib/text"
     }
 })
 
 define([
     "jquery",
-    'split/split.min',
     "text!../app/Clay/html/es_eventview.html"
-], function ($, Split, template) {
+], function ($, template) {
 
-    function EventView() {
-        this.el = ''
-        this.split = null
-        this.height = 0
-        init(this)
+    function EventView(parent) {
+        let _el = template
+        let _parent = parent
+
+        this.render = function (hits) {
+            $(_parent).empty()
+            $(_parent).append(_el)
+            var $tr = $(_parent).find('[es-repeat]')
+            var trHtml = $tr.html().slice(0)
+            var m = trHtml.match('/(\{\{\S+\}\})/g')
+            console.log(m)
+            var tb = $tr.parent()
+            $tr.html('')
+            for (var i = 0; i < hits.length; i++) {
+                var source = hits[i]['_source']
+                var $row = $tr.clone()
+                var html = trHtml.slice(0)
+                html = html.replace('{{line-num}}', '<!--{{line-num}}-->' + (i + 1))
+                html = html.replace('{{date}}', '<!--{{date}}-->' + source['@timestamp'])
+                html = html.replace('{{event_data}}', '<!--{{event_data}}-->' + JSON.stringify(source))
+                $(tb).append($row.html(html))
+            }
+            $tr.hide()
+            return this
+        }
+
     }
-
-    EventView.prototype.constructor = EventView
-    EventView.prototype.addHandler = addHandler
-    EventView.prototype.render = render
 
     return EventView
-
-    function addHandler() {
-
-    }
-
-    function render(parent) {
-        if (this.split) {
-            this.split.destroy()
-        }
-        //$(parent).remove('.split-container')
-        $(parent).append(this.el)
-        // this.split = Split(['#fieldsviewer', '#lazy-view-container'], {
-        //     minSize: [200],
-        //     gutterSize: 1
-        // })
-        $('.split-horizontal').on('resize', function (e) {
-            console.log('resize', e)
-        })
-        return this
-    }
-
-    function init(c) {
-        c.el = template
-        setInterval(function () {
-            if ($('.split-container')) {
-                var h1 = $('#fieldsviewer').height()
-                var h2 = $('#lazy-view-container').height()
-                var h = (h1 > h2) ? h1 : h2
-                if (h !== this.height) {
-                    this.height = h
-                    $('.split-container').height(this.height)
-                }
-            }
-        }, 200)
-    }
 })

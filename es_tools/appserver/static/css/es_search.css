@@ -147,3 +147,32 @@ body {
     display:block;
     padding:2px 20px 2px 32px;
 }
+
+.search-results .tab-content {
+    padding-top: 20px;
+    background-color: #fff;
+    min-height: 400px;
+}
+
+.shared-eventsviewer ul.condensed-selected-fields {
+    margin: 5px 0 0;
+    max-width: 100%;
+}
+
+.shared-eventsviewer ul.condensed-selected-fields li {
+    color: #999;
+    margin-right: 10px;
+    float: left;
+    list-style: none;
+    display: inline;
+    max-width: 100%;
+}
+
+.shared-eventsviewer ul.condensed-selected-fields li .field-value {
+    display: inline-block;
+}
+
+.shared-eventsviewer ul.condensed-selected-fields li>:last-child {
+    padding-right: 10px;
+    border-right: 1px dashed #ccc;
+}
