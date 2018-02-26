@@ -71,7 +71,7 @@ body {
     padding: 0px !important;
 }
 
-.search-results {
+.search-results, .splunk-footer {
     background-color: #fff;
 }
 
