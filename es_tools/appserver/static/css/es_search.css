@@ -86,6 +86,11 @@ body {
     position:relative;
 }
 
+.shared-eventsviewer-list, .shared-eventsviewer-raw, .shared-eventsviewer-table {
+    margin-bottom:-1px;
+    overflow-y:hidden;
+}
+
 .lazy-events-viewer.loading, .shared-eventsviewer {
     border-left:1px solid #d5d5d5;
 }
@@ -175,4 +180,19 @@ body {
 .shared-eventsviewer ul.condensed-selected-fields li>:last-child {
     padding-right: 10px;
     border-right: 1px dashed #ccc;
+}
+
+.event_source_key {
+    font-weight: bold;
+    margin-right: 4px;
+    float:left;
+    position:relative;
+}
+
+.event_source_value {
+    margin-right: 10px;
+    float:left;
+    position:relative;
+    word-break:normal;
+    word-wrap:normal;
 }

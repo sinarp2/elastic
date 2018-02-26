@@ -2,11 +2,11 @@
     <div class="search-results-eventspane-fieldsviewer" style="display: block;">
         <div class="fields-controls">
             <div class="fields-controls-inner">
-                <a href="#" class="remove btn-pill">
+                <a href="#" class="remove btn-pill" id="btn_hide_fields">
                     <i class="icon-chevron-left icon-no-underline"></i>
                     <span>Hide Fields</span>
                 </a>
-                <a href="#" class="all btn-pill">
+                <a href="#" class="all btn-pill" id="btn_all_fields">
                     <i class="icon-list icon-no-underline icon-large"></i>
                     <span>All Fields</span>
                 </a>
@@ -220,7 +220,7 @@
                 <i class="icon icon-plus"></i> Extract New Fields </a>
         </div>
     </div>
-    <div class="lazy-view-container lazy-events-viewer shared-eventsviewer-lazyeventsviewer" style="height: 100%; width: 100%; display: block;margin-left:240px;">
+    <div class="lazy-view-container lazy-events-viewer shared-eventsviewer-lazyeventsviewer">
         <div class="shared-eventsviewer">
             <div class="scrolling-table-wrapper shared-eventsviewer-list"style="display: block;">
                 <div class="header-table-docked" style="display: none; right: 0px; left: 241px; top: -1000px;">
@@ -274,29 +274,35 @@
                             </td>
                             <td class="event">
                                 <div class="shared-eventsviewer-shared-rawfield">
-                                    <div class="json-event  wrap "></div>
-                                    <div class="raw-event normal  wrap ">
+                                    <div class="json-event wrap"></div>
+                                    <div class="raw-event normal wrap">
                                         {{event_data}}
                                     </div>
                                 </div>
                                 <div class="shared-eventsviewer-list-body-row-selectedfields shared-eventsviewer">
                                     <ul class="condensed-selected-fields">
                                         <li>
-                                            <span class="field">host =</span>
+                                            <span class="field">_index =</span>
                                             <span class="field-value">
-                                                <a href="#" class="f-v" data-field-name="host" title="demo.zettadian.com">demo.zettadian.com</a>
+                                                <a href="#" class="f-v" title="{{index}}">{{index}}</a>
                                             </span>
                                         </li>
                                         <li>
-                                            <span class="field">source =</span>
+                                            <span class="field">_type =</span>
                                             <span class="field-value">
-                                                <a href="#" class="f-v" data-field-name="source" title="/home/itian/splunk-7.0.2/var/log/splunk/splunkd_ui_access.log">/home/itian/splunk-7.0.2/var/log/splunk/splunkd_ui_access.log</a>
+                                                <a href="#" class="f-v" title="{{type}}">{{type}}</a>
                                             </span>
                                         </li>
                                         <li>
-                                            <span class="field">sourcetype =</span>
+                                            <span class="field">_id =</span>
                                             <span class="field-value">
-                                                <a href="#" class="f-v" data-field-name="sourcetype" title="splunkd_ui_access">splunkd_ui_access</a>
+                                                <a href="#" class="f-v" title="{{id}}">{{id}}</a>
+                                            </span>
+                                        </li>
+                                        <li>
+                                            <span class="field">_score =</span>
+                                            <span class="field-value">
+                                                <a href="#" class="f-v" title="{{score}}">{{score}}</a>
                                             </span>
                                         </li>
                                     </ul>

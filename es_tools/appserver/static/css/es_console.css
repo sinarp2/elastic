@@ -52,6 +52,19 @@ html, body {
     float: left;
 }
 
+body .ace_scrollbar-v {
+    overflow-y: auto;
+}
+
+body .ace_scrollbar-h {
+    overflow-x: auto;
+}
+
+.ace_scrollbar-inner {
+	background-color: #eee;
+	opacity: 0.01;
+}
+
 .floating-menu {
     padding: 0px;
     /* Position the tooltip */

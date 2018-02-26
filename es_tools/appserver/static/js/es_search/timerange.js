@@ -144,7 +144,6 @@ define([
         function checkPopdownDialog(e) {
             var el1 = $('.popdown-dialog')
             if (!el1.hasClass('open')) {
-                console.log('not opened')
                 return
             }
             var el2 = $('.search-timerange')
