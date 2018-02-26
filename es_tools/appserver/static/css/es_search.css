@@ -159,6 +159,27 @@ body {
     min-height: 400px;
 }
 
+.shared-eventsviewer .normal.raw-event.wrap {
+    white-space:pre-wrap;
+    word-break:break-all;
+}
+
+.shared-eventsviewer .normal.raw-event {
+    background-color:inherit;
+    border:none;
+    white-space:pre;
+}
+
+.event .json-event, .event .raw-event {
+    font-family:Droid Sans Mono,Consolas,Monaco,Courier New,Courier,monospace;
+    font-size:12px;
+    color:#333;
+    border:none;
+    background-color:transparent;
+    margin:auto;
+    padding:0;
+}
+
 .shared-eventsviewer ul.condensed-selected-fields {
     margin: 5px 0 0;
     max-width: 100%;
@@ -173,6 +194,10 @@ body {
     max-width: 100%;
 }
 
+.shared-eventsviewer-list-body-row-selectedfields {
+    clear: both;
+}
+
 .shared-eventsviewer ul.condensed-selected-fields li .field-value {
     display: inline-block;
 }
@@ -182,8 +207,18 @@ body {
     border-right: 1px dashed #ccc;
 }
 
+.shared-eventsviewer ul.condensed-selected-fields li .f-v, .shared-eventsviewer ul.condensed-selected-fields li .more-fields {
+    color: #333;
+    cursor: pointer;
+}
+
+.shared-eventsviewer ul.condensed-selected-fields li .f-v:hover, .shared-eventsviewer ul.condensed-selected-fields li .more-fields:hover {
+    color:#3863a0;
+}
+
 .event_source_key {
     font-weight: bold;
+    color: #888;
     margin-right: 4px;
     float:left;
     position:relative;

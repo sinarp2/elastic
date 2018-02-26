@@ -91,24 +91,24 @@ define([
             // }
             sourceString += '<span class="event_source_key">' + key + ':</span><span class="event_source_value">' + value + '</span>'
         })
-        html = html.replace(/{{event_data}}/g, '<!--{{event_data}}-->' + sourceString)
+        html = html.replace(/{{event_data}}/g, sourceString)
         return html
     }
 
     function onIndex(key, value, html) {
-        return html.replace(/{{index}}/g, '<!--{{index}}-->' + value)
+        return html.replace(/{{index}}/g, value)
     }
 
     function onType(key, value, html) {
-        return html.replace(/{{type}}/g, '<!--{{type}}-->' + value)
+        return html.replace(/{{type}}/g, value)
     }
 
     function onId(key, value, html) {
-        return html.replace(/{{id}}/g, '<!--{{id}}-->' + value)
+        return html.replace(/{{id}}/g, value)
     }
 
     function onScore(key, value, html) {
-        return html.replace(/{{score}}/g, '<!--{{score}}-->' + value)
+        return html.replace(/{{score}}/g, value)
     }
 
 })

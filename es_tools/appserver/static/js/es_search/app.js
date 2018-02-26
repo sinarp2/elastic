@@ -10,6 +10,7 @@ require([
     "jquery",
     "es/timerange",
     "es/eventview",
+    "es/modalview",
     "ace/ace",
     "text!../app/Clay/html/es_search.html",
     'splunkjs/mvc/simplexml/ready!'
@@ -17,6 +18,7 @@ require([
     $,
     TimerangeDlg,
     EventView,
+    ModalView,
     ace,
     es_search,
     es_eventview,
@@ -44,7 +46,6 @@ require([
     })
 
     function setupEditor() {
-
         editor.setValue('', -1)
         editor.setShowPrintMargin(false)
         editor.$blockScrolling = Infinity
@@ -89,8 +90,8 @@ require([
     }
 
     /*
-    * 검색창의 검색문장을 저장한다
-    */
+     * 검색창의 검색문장을 저장한다
+     */
     function saveQuery(editor, canStore) {
         if (canStore) {
             localStorage.setItem('discover_history', editor.getValue())
@@ -98,8 +99,8 @@ require([
     }
 
     /*
-    * 검색창에서 줄바꿈이 일어나면 검색창 크기를 조정한다
-    */
+     * 검색창에서 줄바꿈이 일어나면 검색창 크기를 조정한다
+     */
     function resizeEditor() {
         var newHeight =
             editor.getSession().getScreenLength() *
@@ -110,6 +111,8 @@ require([
     }
 
     function call_api(editor) {
+        editor.blur()
+        updateEventCount(0)
         var query = editor.getValue().trim()
         query = query.replace(/[\n\r]+/g, ' ');
         var arr = query.split(' ')
@@ -126,18 +129,44 @@ require([
             "uri": arr[1],
             "data": data
         }
-        $.get(esapi, queryParam, function (data, status, xhr) {
-            try {
-                var jobj = JSON.parse(data);
-                if (jobj.hits) {
-                    eventview.render(jobj.hits.hits)
-                }
 
+        var defer = $.get(esapi, queryParam)
+
+        defer.done(function (result, status, xhr) {
+            if (result['error']) {
+                showMessage('Error', result['error'])
+                return
+            }
+            try {
+                var jobj = JSON.parse(result);
+                if (jobj.hits) {
+                    console.log('hits', jobj.hits)
+                    updateEventCount(jobj.hits.total.toLocaleString())
+                    eventview.render(jobj.hits.hits)
+                } else {
+                    showMessage('Error', result)
+                }
             } catch (e) {
                 console.log('err', e)
-                console.log('row text', data)
+                console.log('row text', result, status)
             }
         })
+
+        defer.fail(function (xhr) {
+            showMessage(xhr.status + ' ' + xhr.statusText, xhr.responseText)
+        })
+    }
+
+    function updateEventCount(count) {
+        $('#tab_events').text(' Events (' + count + ')')
+    }
+
+    function showMessage(title, message) {
+        var modal = new ModalView({
+            title: title,
+            message: message
+        })
+        modal.show()
     }
 
 })
