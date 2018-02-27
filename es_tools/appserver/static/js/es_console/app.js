@@ -28,25 +28,35 @@ require([
         }
     }
 
-    function displayExecIcon(editor) {
+    function displayExecIcon(editor, pState) {
         if (isDragging) {
-            return
+            return pState
         }
         if (editor.isFocused()) {
+            // if (pState && $('.floating-menu').is(':visible')) {
+            //     var pos = editor.getCursorPosition()
+            //     if (pos.row >= pState.bpos && pos.row <= pState.epos) {
+            //         return pState
+            //     }
+            // }
             var block = getQueryBlock(editor)
-            var fm = $('.floating-menu')
             if (!block) {
-                fm.fadeOut('slow')
-                return
+                pState = block
+                $('.floating-menu').fadeOut('slow')
+                return pState
             }
+            // console.log('pState', pState, block)
+            pState = block
             var cells = $('#one').find('div.ace_gutter-cell')
             var divider = $('.gutter.gutter-horizontal')
             var cell = cells[block.bpos]
+            var fm = $('.floating-menu')
             fm.offset({
                 top: $(cell).offset().top,
                 left: divider.offset().left - 18
             });
             fm.fadeIn()
+            return pState
         }
     }
 
@@ -55,35 +65,40 @@ require([
         if (!text) {
             return null
         }
+        // console.log('text', text)
         var pos = editor.getCursorPosition().row
         var arr, line, bpos, epos
         arr = text.split('\n')
         for (var i = 0; i < arr.length; i++) {
             arr[i] = arr[i].trim()
         }
-
+        // console.log('epos1', epos)
+        // console.log('arr', arr)
         // 커서 이전 블록 검색
         for (var i = pos; i > -1; i--) {
             line = arr[i].toUpperCase()
-            if (line.indexOf('GET') > -1 ||
-                line.indexOf('PUT') > -1 ||
-                line.indexOf('POST') > -1 ||
-                line.indexOf('DELETE') > -1 ||
-                line.indexOf('HEAD') > -1) {
+            // console.log('line', line)
+            if (line.indexOf('GET') === 0 ||
+                line.indexOf('PUT') === 0 ||
+                line.indexOf('POST') === 0 ||
+                line.indexOf('DELETE') === 0 ||
+                line.indexOf('HEAD') === 0) {
                 bpos = i
                 break
             }
         }
 
+        // console.log('epos2', epos)
         // 커서 이후 블록 검색
         var isEmpty = true
         for (var i = pos; i < arr.length; i++) {
             line = arr[i].toUpperCase()
-            if (line.indexOf('GET') > -1 ||
-                line.indexOf('PUT') > -1 ||
-                line.indexOf('POST') > -1 ||
-                line.indexOf('DELETE') > -1 ||
-                line.indexOf('HEAD') > -1) {
+            // console.log('line after', line)
+            if (line.indexOf('GET') === 0 ||
+                line.indexOf('PUT') === 0 ||
+                line.indexOf('POST') === 0 ||
+                line.indexOf('DELETE') === 0 ||
+                line.indexOf('HEAD') === 0) {
                 epos = i
                 break
             }
@@ -91,11 +106,13 @@ require([
                 isEmpty = false
             }
         }
+        // console.log('epos', epos)
 
         if (isEmpty && bpos !== epos) {
             return null
         }
         if (!epos) {
+            // console.log('epos', epos)
             for (var i = arr.length - 1; i > -1; i--) {
                 if (arr[i].trim()) {
                     epos = i + 1
@@ -148,7 +165,7 @@ require([
         if (queryParam.uri.startsWith('/')) {
             queryParam.uri = queryParam.uri.substring(1)
         }
-        //console.log('query', queryParam)
+        console.log('query', queryParam)
         $.get(esapi, queryParam, function (data, status, xhr) {
             try {
                 var jobj = JSON.parse(data);
@@ -183,10 +200,10 @@ require([
 
     $('.floating-menu').hide('fast')
 
-    editor1.session.on('change', _.debounce(function (delta, session) {
-        // Run code here, debounce delay has passed
-        //console.log('debounced', delta, session)
-    }, 250))
+    // editor1.session.on('change', _.debounce(function (delta, session) {
+    //     // Run code here, debounce delay has passed
+    //     //console.log('debounced', delta, session)
+    // }, 250))
 
     // var keyboardHandler = new HashHandler.HashHandler();
     // var ua = window.navigator.userAgent.toUpperCase();
@@ -220,7 +237,7 @@ require([
     }
 
     setInterval(saveQuery, 500, editor1, canStore)
-    setInterval(displayExecIcon, 100, editor1, null)
+    //setInterval(displayExecIcon, 100, editor1, {})
 
     $('.exec-query').click(function () {
         call_api(editor1)
@@ -233,10 +250,18 @@ require([
 
     function onDragEnd() {
         isDragging = false
+        displayExecIcon(editor1, null)
     }
 
     function onDrag() {
         isDragging = true
         $('.floating-menu').fadeOut()
     }
+
+    (function finitState(pState) {
+        setTimeout(function() {
+            pState = displayExecIcon(editor1, pState)
+            finitState(pState)
+        }, 100)
+    })(null)
 })

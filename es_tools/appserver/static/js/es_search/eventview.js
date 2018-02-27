@@ -56,15 +56,23 @@ define([
         $('#btn_all_fields').on('click', e => {
             showAllFields(true)
         })
+        $('.search-results-eventspane-controls-showfield').on('click', function () {
+            showFields(true)
+        })
     }
 
     function showFields(bShow) {
+        console.log('showFields', bShow)
         if (bShow) {
             $('.search-results-eventspane-fieldsviewer').css('margin-left', '0')
             $('.lazy-view-container').css('margin-left', '240px')
+            $('.shared-controls-syntheticselectcontrol').css('margin-left', '0')
+            $('.search-results-eventspane-controls-showfield').css('display', 'none')
         } else {
             $('.search-results-eventspane-fieldsviewer').css('margin-left', '-240px')
             $('.lazy-view-container').css('margin-left', '0')
+            $('.shared-controls-syntheticselectcontrol').css('margin-left', '0')
+            $('.search-results-eventspane-controls-showfield').css('display', 'block')
         }
     }
 
