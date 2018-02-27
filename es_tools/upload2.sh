@@ -1,3 +1,4 @@
+sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/appserver/static/js/es_console/app.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_console/
 sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/appserver/static/js/es_search/app.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
 sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/appserver/static/js/es_search/timerange.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
 sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/appserver/static/js/es_search/eventview.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/

@@ -8,8 +8,13 @@ html, body {
     border-radius: 4px;
 }
 
+.panel-body.html {
+    padding: 0px !important;
+    background-color: #ddd;
+}
+
 #one, #two {
-    padding: 20px;
+    padding: 2px;
 }
 
 #one p {
@@ -18,7 +23,7 @@ html, body {
 
 .split p,
 .split-flex p {
-    padding: 20px;
+    padding: 0px;
 }
 
 .split,

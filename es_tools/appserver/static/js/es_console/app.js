@@ -7,17 +7,20 @@ require.config({
 
 require([
     "jquery",
+    "underscore",
     'split/split.min',
     "ace/ace",
     'splunkjs/mvc/simplexml/ready!'
 ], function (
     $,
+    _,
     Split,
     ace
 ) {
 
     var esapi = "/custom/Clay/estools/esapi"
     var canStore = false
+    var isDragging = false
 
     function saveQuery(editor, canStore) {
         if (canStore) {
@@ -26,6 +29,9 @@ require([
     }
 
     function displayExecIcon(editor) {
+        if (isDragging) {
+            return
+        }
         if (editor.isFocused()) {
             var block = getQueryBlock(editor)
             var fm = $('.floating-menu')
@@ -34,13 +40,13 @@ require([
                 return
             }
             var cells = $('#one').find('div.ace_gutter-cell')
-            var content = $('#one').find('div.ace_content')
+            var divider = $('.gutter.gutter-horizontal')
             var cell = cells[block.bpos]
             fm.offset({
                 top: $(cell).offset().top,
-                left: content.width() + content.offset().left - fm.width() - 4
+                left: divider.offset().left - 18
             });
-            fm.fadeIn(3000)
+            fm.fadeIn()
         }
     }
 
@@ -154,9 +160,13 @@ require([
         })
     }
 
+    // 에디터의 최소 너비가 329px 이기 때문에
+    // 이 값에 맞춘다.
     Split(['#one', '#two'], {
         sizes: [50, 50],
-        minSize: 200
+        minSize: 330,
+        onDrag: onDrag,
+        onDragEnd: onDragEnd
     })
 
     var editor1 = ace.edit("one", {
@@ -173,9 +183,10 @@ require([
 
     $('.floating-menu').hide('fast')
 
-    // editor1.session.on('change', function (delta, esess) {
-
-    // })
+    editor1.session.on('change', _.debounce(function (delta, session) {
+        // Run code here, debounce delay has passed
+        //console.log('debounced', delta, session)
+    }, 250))
 
     // var keyboardHandler = new HashHandler.HashHandler();
     // var ua = window.navigator.userAgent.toUpperCase();
@@ -209,9 +220,23 @@ require([
     }
 
     setInterval(saveQuery, 500, editor1, canStore)
-    setInterval(displayExecIcon, 500, editor1)
+    setInterval(displayExecIcon, 100, editor1, null)
 
-    $('.exec-query').click(function() {
+    $('.exec-query').click(function () {
         call_api(editor1)
     })
+
+    $('div.ace_content').on('resize', _.debounce(function () {
+        // Run code here, debounce delay has passed
+        // console.log('debounced')
+    }, 250));
+
+    function onDragEnd() {
+        isDragging = false
+    }
+
+    function onDrag() {
+        isDragging = true
+        $('.floating-menu').fadeOut()
+    }
 })
