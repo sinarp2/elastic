@@ -6,37 +6,55 @@ require.config({
 
 define([
     "jquery",
+    "underscore",
+    "backbone",
     "moment",
     "text!../app/Clay/html/es_eventview.html"
-], function ($, moment, template) {
+], function ($, _, Backbone, moment, template) {
 
     // table-row-expanding 테이블 drilldown 시 추가 해야할 css 클래스
 
     var bindingFunc = {
-        "_source" : onSource,
-        "_index" : onIndex,
-        "_type" : onType,
-        "_id" : onId,
-        "_score" : onScore
+        "_source": onSource,
+        "_index": onIndex,
+        "_type": onType,
+        "_id": onId,
+        "_score": onScore
     }
 
-    function EventView(parent) {
-        let _el = template
-        let _parent = parent
+    var view = Backbone.View.extend({
+        initialize: function () {
+        },
+        events: {
+            'click #btn_hide_fields': function () {
+                showFields(false)
+            },
+            'click #btn_all_fields': function () {
+                showAllFields(true)
+            },
+            'click .search-results-eventspane-controls-showfield': function () {
+                showFields(true)
+            }
+        },
+        render: function (hits, from) {
+            this.$el.empty()
+            if (hits.total === 0) {
+                return
+            }
 
-        this.render = function (hits) {
-            $(_parent).empty()
-            $(_parent).append(_el)
-            createEvent()
+            this.$el.html(template)
+
+            makeNavigation(hits.total, hits.hits.length, from)
             showFields(true)
-            var $tr = $(_parent).find('[es-repeat]')
+
+            var $tr = this.$el.find('[es-repeat]')
             var trHtml = $tr.html().slice(0)
             var tb = $tr.parent()
             $tr.html('')
-            for (var i = 0; i < hits.length; i++) {
+            for (var i = 0; i < hits.hits.length; i++) {
                 var $row = $tr.clone()
                 var html = trHtml.slice(0)
-                $.each(hits[i], function(key, value) {
+                $.each(hits.hits[i], function (key, value) {
                     html = bind(key, value, html)
                 })
                 html = html.replace(/{{line-num}}/g, '<!--{{line-num}}-->' + (i + 1))
@@ -45,24 +63,9 @@ define([
             $tr.hide()
             return this
         }
-    }
-
-    return EventView
-
-    function createEvent() {
-        $('#btn_hide_fields').on('click', function (e) {
-            showFields(false)
-        })
-        $('#btn_all_fields').on('click', e => {
-            showAllFields(true)
-        })
-        $('.search-results-eventspane-controls-showfield').on('click', function () {
-            showFields(true)
-        })
-    }
+    })
 
     function showFields(bShow) {
-        console.log('showFields', bShow)
         if (bShow) {
             $('.search-results-eventspane-fieldsviewer').css('margin-left', '0')
             $('.lazy-view-container').css('margin-left', '240px')
@@ -80,6 +83,74 @@ define([
 
     }
 
+    function makeNavigation(total, size, from) {
+        var totalPages = Math.ceil(total / size)
+        var currPage = Math.ceil(from / size)
+        var startPage, endPage, prevPage, nextPage
+        if (currPage < 6) {
+            startPage = 1
+            endPage = (totalPages < 9) ? totalPages : 9
+        } else {
+            startPage = currPage - 3
+            endPage = (totalPages < (currPage + 4)) ? totalPages : (currPage + 4)
+        }
+
+        prevPage = (currPage === 1) ? 1 : currPage - 1
+        nextPage = (totalPages < (currPage + 1)) ? totalPages : (currPage + 1)
+
+        var $ul = $('.pagination ul')
+        var disabled = (currPage === 1) ? 'disabled' : ''
+        var html = '<li class="previous ' + disabled + '">\
+                        <a class="page-controls" data-page="' + prevPage + '">\
+                            <i class="icon-chevron-left"></i>\
+                            <span>Prev</span>\
+                        </a>\
+                    </li>'
+        $ul.append(html)
+
+        if (currPage > 5) {
+            html = '<li class="number">\
+                        <a href="#" data-page="1">1</a>\
+                    </li>\
+                    <li class="dots disabled">\
+                        <a class="dots">...</a>\
+                    </li>'
+            $ul.append(html)
+        }
+
+        for (var i = startPage; i < endPage + 1; i++) {
+            var active = (i === currPage) ? 'active' : ''
+            html = '<li class="number ' + active + '">\
+                        <a href="#" data-page="' + i + '">' + i + '</a>\
+                    </li>'
+            $ul.append(html)
+        }
+
+        if (endPage !== totalPages) {
+            html = '<li class="dots disabled">\
+                        <a class="dots">...</a>\
+                    </li>'
+            $ul.append(html)
+        }
+
+        disabled = (endPage === totalPages) ? 'disabled' : ''
+        html = '<li class="next ' + disabled + '">\
+                    <a href="#" class="page-controls" data-page="' + nextPage + '">\
+                        <span>Next</span>\
+                        <i class="icon-chevron-right"></i>\
+                    </a>\
+                </li>'
+        $ul.append(html)
+
+        $ul.find('a').on('click', function (e) {
+            var gotoPage = $(e.target).closest('a').data('page')
+            if (gotoPage === currPage) {
+                return
+            }
+            Backbone.Events.trigger('execQuery', gotoPage)
+        })
+    }
+
     function bind(key, value, html) {
         if (bindingFunc.hasOwnProperty(key)) {
             return bindingFunc[key](key, value, html)
@@ -93,7 +164,7 @@ define([
         html = html.replace(/{{date}}/g, '<!--{{date}}-->' + dt.format('YYYY-MM-DD'))
         html = html.replace(/{{time}}/g, '<!--{{time}}-->' + dt.format('hh:mm:ss.SSS ZZ'))
         var sourceString = ''
-        $.each(value, function(key, value) {
+        $.each(value, function (key, value) {
             // if (key === "@timestamp") {
             //     return
             // }
@@ -118,5 +189,7 @@ define([
     function onScore(key, value, html) {
         return html.replace(/{{score}}/g, value)
     }
+
+    return view
 
 })

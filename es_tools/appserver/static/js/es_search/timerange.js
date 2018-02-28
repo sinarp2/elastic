@@ -6,72 +6,77 @@ require.config({
 
 define([
     "jquery",
+    "underscore",
+    "backbone",
     "text!../app/Clay/html/es_timerange.html"
-], function ($, template) {
+], function ($, _, Backbone, template) {
 
-    var canStore = false
-    var timerange = null
-    var handlers = []
-
-    function TimerangeDlg(parentElement){
-        setUp(parentElement)
-    }
-
-    TimerangeDlg.prototype.constructor = TimerangeDlg
-    TimerangeDlg.prototype.addHandler = addHandler
-
-    return TimerangeDlg;
-
-    function trigger(name, args) {
-        for (var i = 0; i < handlers.length; i++) {
-            if (handlers[i].name === name) {
-                handlers[i].handler.call(args)
-                break;
+    var view = Backbone.View.extend({
+        initialize: function () {
+            if (typeof (Storage) !== "undefined") {
+                this.canStore = true
+                if (sessionStorage.timerange) {
+                    try {
+                        this.timerange = $.parseJSON(sessionStorage.getItem('timerange'))
+                    } catch (e) {
+                        this.timerange = null
+                    }
+                }
+            } else {
+                this.canStore = false
             }
-        }
-    }
-
-    function addHandler(name, handler) {
-        handlers.push({
-            name: name,
-            handler: handler
-        })
-    }
-
-    function setTimeRangeTitle() {
-        if (!timerange) {
-            timerange = {
+            this.render()
+            setCloseWindow()
+        },
+        events: {
+            'click a.splBorder.btn': toggleCalendar,
+            'click .accordion-toggle': toggleAccordian,
+            'click .dropdown-toggle': toggleDropdown,
+            'click .presets-group > li > a': setPresets
+        },
+        render: function () {
+            this.$el.append(_.template(template));
+            this.timerange = {
                 idx: 0,
                 title: 'Last 24 hours',
                 data: {
-                    earliest: '-24h@h',
+                    earliest: '-24h/h',
                     latest: 'now'
                 }
             }
+            this.delegateEvents()
+            setTimeRangeTitle(this.timerange, this.canStore)
+            return this
+        },
+        getTimerange: function () {
+            return this.timerange
         }
-        $('.time-label').attr('title', timerange.title)
-        $('.time-label').text(timerange.title)
-        $($('.accordion-toggle')[timerange.idx]).click()
-        sessionStorage.setItem('timerange', JSON.stringify(timerange))
-    }
+    })
 
     function setPresets(e) {
-        timerange = {
+        this.timerange = {
             type: 'Presets',
             idx: 0,
             title: $(e.target).text(),
             data: $(e.target).data()
         }
-        setTimeRangeTitle()
+        setTimeRangeTitle(this.timerange, this.canStore)
         toggleCalendar()
-        trigger('setTimerange')
+    }
+
+    function setTimeRangeTitle(timerange, canStore) {
+        $('.time-label').attr('title', timerange.title)
+        $('.time-label').text(timerange.title)
+        $($('.accordion-toggle')[timerange.idx]).click()
+        if (canStore) {
+            sessionStorage.setItem('timerange', JSON.stringify(timerange))
+        }
     }
 
     /*
      * 가간 설정 창 내 dropdown 창을 열고 닫는다
      */
     function toggleDropdown(e) {
-        console.log('toggle')
         var el = $(e.target).closest('.dropdown-toggle')
         var dropdown = $(el).next('.dropdown-menu')
         if (dropdown.hasClass('open')) {
@@ -87,11 +92,9 @@ define([
     function toggleCalendar() {
         var dlg = $('.popdown-dialog')
         if (dlg.hasClass('open')) {
-            console.log('toggle close')
             dlg.removeClass('open')
         } else {
             dlg.addClass('open')
-            console.log('toggle open')
         }
     }
 
@@ -165,28 +168,5 @@ define([
         }
     }
 
-    function setUp(parentElement) {
-        $(parentElement).append(template)
-        $('a.splBorder.btn').on('click', toggleCalendar)
-        $('.accordion-toggle').on('click', toggleAccordian)
-        $('.presets-group').find('a').on('click', setPresets)
-        $('.dropdown-toggle').on('click', toggleDropdown)
-
-        if (typeof (Storage) !== "undefined") {
-            canStore = true
-            if (sessionStorage.timerange) {
-                try {
-                    timerange = $.parseJSON(sessionStorage.getItem('timerange'))
-                } catch (e) {
-                    timerange = null
-                }
-            }
-        } else {
-            canStore = false
-        }
-
-        setTimeRangeTitle()
-
-        setCloseWindow()
-    }
+    return view
 })
