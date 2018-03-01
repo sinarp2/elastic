@@ -39,10 +39,10 @@ define([
             // width 너비를 60%로 할 경우 left 값은 (100 - 60) / 2 = 20%
             // width 너비를 70%로 할 경우 left 값은 (100 - 70) / 2 = 15%
             $(this.el).find('.modal').css({
-                width: '60%',
+                width: '50%',
                 height: 'auto',
-                top: '20%',
-                left: '20%',
+                top: '25%',
+                left: '25%',
                 'margin-left': '0',
                 'max-height': '100%'
             })

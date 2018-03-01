@@ -12,6 +12,7 @@ sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/apps
 sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/appserver/static/html/es_eventview.html itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/html/
 sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/appserver/static/html/es_search.html itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/html/
 sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/appserver/static/html/es_queryeditor.html itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/html/
+sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/appserver/static/html/es_timerange.html itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/html/
 
 scp ./appserver/static/html/es_eventview.html itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/html/
 scp ./appserver/static/css/es_eventview.css itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/css/
@@ -41,3 +42,25 @@ curl http://demo.zettadian.com:29200/dhcp*/_search?pretty&scroll=1m -H 'Content-
         }
     }
 }'
+
+
+
+
+GEt  dhcp*/_search  {
+   "query": {
+    "bool": {
+      "filter": [{
+        "term": {
+          "dhcplog_type": "deleted"
+        }},{
+        "range" : {
+            "@timestamp" : {
+                "gte": "2017-12-22T00:05:50.000Z", 
+                "lte": "now", 
+                "time_zone": "+09:00"
+            }
+        }}
+      ]
+    }
+  }
+}

@@ -3,17 +3,18 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
     var ESAPI_URL = "/custom/Clay/estools/esapi"
 
     return {
-        simpleQuery: simpleQuery
+        simpleQuery: simpleQuery,
+        tokenizeQuery: tokenizeQuery,
+        rebuildQuery: rebuildQuery
     }
 
-    function simpleQuery(text, page) {
-        page = page || 1
+    function simpleQuery(params) {
         var deferred = $.Deferred()
-        var params = getQueryParams(text, page)
 
         $.ajax(ESAPI_URL, {
             data: params
         }).done(function (res, status, xhr) {
+            console.log('xhr', this)
             var jo = checkResultData(res)
             if (jo.status === 'OK') {
                 deferred.resolve(jo.data, params.from)
@@ -27,6 +28,62 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         })
 
         return deferred.promise()
+    }
+
+    function tokenizeQuery(text) {
+        var arr = text.trim().split(/\s+/)
+        var qo = {}
+
+        if (arr.length < 2) {
+            return null
+        }
+        qo.method = arr[0].toUpperCase()
+        qo.uri = arr[1]
+        qo.data = '{}'
+
+        var bpos = text.indexOf('{')
+        if (bpos > -1) {
+            qo.data = text.substring(bpos)
+        }
+        qo.index = qo.uri.replace('_search', '').replace('/', '')
+
+        return qo
+    }
+
+    function rebuildQuery(data, timerange, page) {
+        var jo = JSON.parse(data)
+        var size = (jo['size']) ? jo['size'] : 10
+        jo['from'] = (page - 1) * size + 1
+        jo['size'] = size
+        if (!jo.query) {
+            jo['query'] = {
+                "range": {
+                    "@timestamp": {
+                        "gte": "2017-11-22T00:05:50.000Z",
+                        "lte": timerange.lte,
+                        "time_zone": "+09:00"
+                    }
+                }
+            }
+        } else if (!jo.query.bool) {
+            var oldQuery = jo.query
+            jo.query = {
+                "bool": {
+                    "filter": {
+                        "range": {
+                            "@timestamp": {
+                                "gte": "2017-11-22T00:05:50.000Z",
+                                "lte": timerange.lte,
+                                "time_zone": "+09:00"
+                            }
+                        }
+                    }
+                }
+            }
+            jo.query.bool["must"] = oldQuery
+        }
+        console.log('buildquery', jo)
+        return JSON.stringify(jo)
     }
 
     function checkResultData(data) {
@@ -47,40 +104,5 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
             result.data = e
         }
         return result
-    }
-
-    function getQueryParams(text, page) {
-        query = text.trim().replace(/[\n\r]+/g, ' ');
-        var arr = query.split(' ')
-        if (arr.length < 2) {
-            return
-        }
-        var bpos = query.indexOf('{')
-        var data = ""
-        if (bpos > 0) {
-            data = query.substring(bpos)
-        }
-
-        var from = 1
-        // 페이지 처리
-        try {
-            var jo = JSON.parse(data)
-            var size = (jo['size']) ? jo['size'] : 10
-            jo['from'] = (page - 1) * size + 1
-            jo['size'] = size
-            from = jo['from']
-            data = JSON.stringify(jo)
-        } catch (e) {
-            // skip
-            console.log('not json object', e)
-        }
-        // 페이지 처리
-
-        return {
-            "method": arr[0],
-            "uri": arr[1],
-            "data": data,
-            "from": from
-        }
     }
 })

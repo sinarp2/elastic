@@ -20,8 +20,13 @@ define([
         getValue: function () {
             return this.editor.getValue()
         },
-        getTimeRange: function() {
+        getTimeRange: function () {
             return this.timerange.getTimerange()
+        },
+        events: {
+            'click .search-button > a.btn': function () {
+                onEnterEditor(this.editor)
+            }
         },
         render: function () {
             this.$el.html(_.template(template, {}));
@@ -32,7 +37,7 @@ define([
             var timerange = new TimeRange({
                 el: $('.shared-timerangepicker')
             })
-            
+
             var editor = ace.edit($(".ace_editor").get(0), {
                 mode: "ace/mode/text"
             })
@@ -111,7 +116,7 @@ define([
     }
 
     function onEnterEditor(editor) {
-        Backbone.Events.trigger('execQuery', 0)
+        Backbone.Events.trigger('execQuery', 1, true)
     }
 
     return view

@@ -4,11 +4,8 @@ require.config({
     }
 })
 
-define([
-    "jquery",
-    "underscore",
-    "backbone",
-    "moment",
+define(["jquery", "underscore",
+    "backbone", "moment",
     "text!../app/Clay/html/es_eventview.html"
 ], function ($, _, Backbone, moment, template) {
 
@@ -24,15 +21,18 @@ define([
 
     var view = Backbone.View.extend({
         initialize: function () {
+            this.bShowFields = true
         },
         events: {
             'click #btn_hide_fields': function () {
+                this.bShowFields = false
                 showFields(false)
             },
             'click #btn_all_fields': function () {
                 showAllFields(true)
             },
             'click .search-results-eventspane-controls-showfield': function () {
+                this.bShowFields = true
                 showFields(true)
             }
         },
@@ -45,7 +45,7 @@ define([
             this.$el.html(template)
 
             makeNavigation(hits.total, hits.hits.length, from)
-            showFields(true)
+            showFields(this.bShowFields)
 
             var $tr = this.$el.find('[es-repeat]')
             var trHtml = $tr.html().slice(0)

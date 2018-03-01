@@ -41,24 +41,57 @@ require([
     })
 
     Backbone.Events.on('execQuery', function (pageNum) {
-        if (pageNum === 0) {
+        executeQuery(pageNum)
+    })
+
+    Backbone.Events.on('error', function (message) {
+        showMessage('정보', message)
+    })
+
+    function executeQuery(pageNum, isNew) {
+        console.log('executeQuery', pageNum, isNew)
+        // 신규 검색
+        // 필드 목록 추출
+        if (isNew) {
             updateEventCount(0)
         }
-        console.log('timerange', queryEditor.getTimeRange())
-        var defer = QueryExec.simpleQuery(queryEditor.getValue(), pageNum)
+
+        var qo = QueryExec.tokenizeQuery(queryEditor.getValue())
+        if (!qo) {
+            return
+        }
+        if (qo.method !== 'GET') {
+            Backbone.Events.trigger('error', '검색문장은 GET으로 시작하여야 합니다.')
+            return
+        }
+        if (qo.uri.indexOf('_search') < 0) {
+            Backbone.Events.trigger('error', '_search 키워드를 사용해 주세요.')
+            return
+        }
+
+        qo.data = QueryExec.rebuildQuery(qo.data, queryEditor.getTimeRange(), pageNum)
+        // var qparams = QueryExec.getQueryParams(qo)
+        // 1. timeline query
+        // 2. fields query
+        // 3. data query
+
+        console.log('query content', qo)
+
+        var defer = QueryExec.simpleQuery(qo)
         defer.done(function (res, from) {
+            console.log('res', res, from)
             eventview.render(res.hits, from)
             updateEventCount(res.hits.total.toLocaleString())
         }).fail(function (res) {
             console.log('fail', res)
         })
-    })
+    }
 
     function updateEventCount(count) {
         $('#tab_events').text(' Events (' + count + ')')
     }
 
-    function _showMessage(title, message) {
+    function showMessage(title, message) {
         var modal = new ModalView({
             title: title,
             message: message

@@ -40,8 +40,8 @@ define([
                 idx: 0,
                 title: 'Last 24 hours',
                 data: {
-                    earliest: '-24h/h',
-                    latest: 'now'
+                    gte: '-24h/h',
+                    lte: 'now'
                 }
             }
             this.delegateEvents()
