@@ -3,31 +3,36 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
     var ESAPI_URL = "/custom/Clay/estools/esapi"
 
     return {
-        simpleQuery: simpleQuery,
+        hitsQuery: hitsQuery,
+        fieldsQuery: fieldsQuery,
+        timelineQuery: timelineQuery,
         tokenizeQuery: tokenizeQuery,
-        rebuildQuery: rebuildQuery
+        buildQuery: buildQuery
     }
 
-    function simpleQuery(params) {
-        var deferred = $.Deferred()
+    function hitsQuery(params) {
+        return doGet(params)
+    }
 
-        $.ajax(ESAPI_URL, {
+    function fieldsQuery(params) {
+        params.uri = params.index
+        params.data = ''
+
+        return doGet(params)
+    }
+
+    function timelineQuery(params) {
+        
+        // Timerange 적용 여부
+        // query_string, simple_query_string, range 쿼리는 Timerange 값을 사용하지 않는다.
+        // 때문에 timerange 값으로 aggregation 할 수 없음.
+        return doGet(params)
+    }
+
+    function doGet(params) {
+        return $.ajax(ESAPI_URL, {
             data: params
-        }).done(function (res, status, xhr) {
-            console.log('xhr', this)
-            var jo = checkResultData(res)
-            if (jo.status === 'OK') {
-                deferred.resolve(jo.data, params.from)
-            } else {
-                deferred.reject(jo.data)
-            }
-        }).fail(function (res) {
-            deferred.reject(res.data)
-        }).always(function (res) {
-            //console.log('always', res)
         })
-
-        return deferred.promise()
     }
 
     function tokenizeQuery(text) {
@@ -58,7 +63,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         return qo
     }
 
-    function rebuildQuery(qo, timerange, page) {
+    function buildQuery(qo, timerange, page) {
         var jo = {}
         try {
             jo = JSON.parse(qo.data)

@@ -35,6 +35,7 @@ sshpass -p 'itian1!' scp /Users/dosungnoh/Documents/GitHub/elastic/es_tools/apps
 
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_search/queryexec.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_search/app.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
+scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_search/eventview.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
 
 curl http://demo.zettadian.com:29200/dhcp*/_search?pretty&scroll=1m -H 'Content-Type:application/json' -d '
 {                                                                        

@@ -1,13 +1,15 @@
 require.config({
     paths: {
+        es: "../app/Clay/js/es_search",
         text: "../app/Clay/lib/text"
     }
 })
 
 define(["jquery", "underscore",
     "backbone", "moment",
+    "es/queryexec",
     "text!../app/Clay/html/es_eventview.html"
-], function ($, _, Backbone, moment, template) {
+], function ($, _, Backbone, moment, QueryExec, template) {
 
     // table-row-expanding 테이블 drilldown 시 추가 해야할 css 클래스
 
@@ -36,35 +38,48 @@ define(["jquery", "underscore",
                 showFields(true)
             }
         },
-        render: function (hits, from) {
+        render: function (qo, bRestore) {
+            var deferred = $.Deferred()
+            if (bRestore) {
+                // 신규 검색
+                QueryExec.hitsQuery(qo)
+                QueryExec.fieldsQuery(qo)
+                QueryExec.timelineQuery(qo)
+            } else {
+                // 페이징 처리
+                QueryExec.hitsQuery(qo)
+            }
             this.$el.empty()
-            if (hits.total === 0) {
-                return
-            }
-
-            this.$el.html(template)
-
-            makeNavigation(hits.total, hits.hits.length, from)
-            showFields(this.bShowFields)
-
-            var $tr = this.$el.find('[es-repeat]')
-            var trHtml = $tr.html().slice(0)
-            var tb = $tr.parent()
-            $tr.html('')
-            for (var i = 0; i < hits.hits.length; i++) {
-                var $row = $tr.clone()
-                var html = trHtml.slice(0)
-                $.each(hits.hits[i], function (key, value) {
-                    html = bind(key, value, html)
-                })
-                html = html.replace(/{{line-num}}/g, '<!--{{line-num}}-->' + (i + 1))
-                $(tb).append($row.html(html))
-            }
-            $tr.hide()
-            return this
+            // show progress
+            return deferred
         }
     })
 
+    function getData() {
+        if (hits.total === 0) {
+            return
+        }
+
+        this.$el.html(template)
+
+        makeNavigation(hits.total, hits.hits.length, from)
+        showFields(this.bShowFields)
+
+        var $tr = this.$el.find('[es-repeat]')
+        var trHtml = $tr.html().slice(0)
+        var tb = $tr.parent()
+        $tr.html('')
+        for (var i = 0; i < hits.hits.length; i++) {
+            var $row = $tr.clone()
+            var html = trHtml.slice(0)
+            $.each(hits.hits[i], function (key, value) {
+                html = bind(key, value, html)
+            })
+            html = html.replace(/{{line-num}}/g, '<!--{{line-num}}-->' + (i + 1))
+            $(tb).append($row.html(html))
+        }
+        $tr.hide()
+    }
     function showFields(bShow) {
         if (bShow) {
             $('.search-results-eventspane-fieldsviewer').css('margin-left', '0')

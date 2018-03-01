@@ -40,15 +40,15 @@ require([
             el: $('.tab-content')
         })
 
-        Backbone.Events.on('execQuery', function (pageNum) {
-            executeQuery(pageNum)
+        Backbone.Events.on('execQuery', function (pageNum, bRestore) {
+            executeQuery(pageNum, bRestore)
         })
 
-        function executeQuery(pageNum, isNew) {
-            console.log('executeQuery', pageNum, isNew)
+        function executeQuery(pageNum, bRestore) {
+            console.log('executeQuery', pageNum, bRestore)
             // 신규 검색
             // 필드 목록 추출
-            if (isNew) {
+            if (bRestore) {
                 updateEventCount(0)
             }
 
@@ -66,11 +66,14 @@ require([
             }
 
             try {
-                qo = QueryExec.rebuildQuery(qo, queryEditor.getTimeRange(), pageNum)
+                qo = QueryExec.buildQuery(qo, queryEditor.getTimeRange(), pageNum)
             } catch (e) {
                 showMessage('잘 못된 쿼리문장', e)
                 return
             }
+
+            eventview.render(qo, bRestore)
+
             // var qparams = QueryExec.getQueryParams(qo)
             // 1. timeline query
             // 2. fields query
@@ -78,15 +81,15 @@ require([
 
             console.log('query content', qo)
 
-            // 3. data query
-            var defer = QueryExec.simpleQuery(qo)
-            defer.done(function (res, from) {
-                console.log('res', res, from)
-                eventview.render(res.hits, from)
-                updateEventCount(res.hits.total.toLocaleString())
-            }).fail(function (res) {
-                console.log('fail', res)
-            })
+            // // 3. data query
+            // var defer = QueryExec.simpleQuery(qo)
+            // defer.done(function (res, from) {
+            //     console.log('res', res, from)
+            //     eventview.render(res.hits, from)
+            //     updateEventCount(res.hits.total.toLocaleString())
+            // }).fail(function (res) {
+            //     console.log('fail', res)
+            // })
         }
 
         function updateEventCount(count) {
