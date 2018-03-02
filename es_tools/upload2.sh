@@ -37,6 +37,11 @@ scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_search/app.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_search/eventview.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
 
+scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_console/app.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_console/
+scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_console/console.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_console/
+scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/css/es_console.css itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/css
+
+scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/html/es_console.html itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/html
 curl http://demo.zettadian.com:29200/dhcp*/_search?pretty&scroll=1m -H 'Content-Type:application/json' -d '
 {                                                                        
     "query": {

@@ -2,10 +2,16 @@
 html, body {
   height: 100%;
 }
+
+.dashboard-body, .main-section-body {
+    min-height: 0 !important;
+}
+
 .split-container {
-    height: 600px;
+    height: calc(100% - 250px);
     border: 1px solid #ddd;
     border-radius: 4px;
+    margin: 20px 10px;
 }
 
 .panel-body.html {

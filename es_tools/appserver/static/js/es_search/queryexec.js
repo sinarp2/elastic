@@ -3,6 +3,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
     var ESAPI_URL = "/custom/Clay/estools/esapi"
 
     return {
+        doGet: doGet,
         hitsQuery: hitsQuery,
         fieldsQuery: fieldsQuery,
         timelineQuery: timelineQuery,
@@ -22,7 +23,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
     }
 
     function timelineQuery(params) {
-        
+
         // Timerange 적용 여부
         // query_string, simple_query_string, range 쿼리는 Timerange 값을 사용하지 않는다.
         // 때문에 timerange 값으로 aggregation 할 수 없음.
@@ -36,7 +37,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
     }
 
     function tokenizeQuery(text) {
-        var tmpArr = text.trim().split(/\s+/)
+        var tmpArr = text.trim().split(/\s+/).filter(function (e) { return e.trim().length > 0 })
         var qo = {}
 
         if (tmpArr.length < 2) {
