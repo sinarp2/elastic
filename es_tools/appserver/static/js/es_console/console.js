@@ -78,9 +78,9 @@ define([
                 editor1.setOptions({
                     wrap: true
                 })
-                editor2.setOptions({
-                    wrap: true
-                })
+                // editor2.setOptions({
+                //     wrap: true
+                // })
 
                 editor1.setValue(vm.history, -1)
                 editor1.setShowPrintMargin(false);
@@ -102,6 +102,13 @@ define([
                 editor1.session.on('change', _.debounce(function (e) {
                     setLocalStorage('history', editor1.getValue())
                 }, 230))
+
+                editor1.session.on('changeScrollTop', _.debounce(function (e) {
+                    vm.isDragging = true
+                }, 230, true))
+                editor1.session.on('changeScrollTop', _.debounce(function (e) {
+                    vm.isDragging = false
+                }, 230, false))
 
                 vm.split = split
                 vm.editor1 = editor1
@@ -169,7 +176,7 @@ define([
             if (!queryParam) {
                 return
             }
-            console.log(queryParam)
+            // console.log(queryParam)
             if (queryParam.uri.startsWith('/')) {
                 queryParam.uri = queryParam.uri.substring(1)
             }
@@ -211,14 +218,19 @@ define([
 
             var $aln = $('.ace_active-line')
             var $div = $('.gutter.gutter-horizontal')
+            var $scr = $('.ace_scrollbar.ace_scrollbar-v')
             var $fmn = $('.floating-menu')
+            var top = $aln.offset().top - ($aln.height() * (block.cpos - block.bpos))
+
+            top = (top < $scr.offset().top) ? $scr.offset().top + 5 : top
 
             $fmn.offset({
-                top: $aln.offset().top - ($aln.height() * (block.cpos - block.bpos)),
-                left: $aln.offset().left + $aln.width() - 18
+                top: top,
+                left: $aln.offset().left + $aln.width() - $scr.width() - 5
             });
+            
             $fmn.fadeIn()
-
+            
             return pState
         }
 

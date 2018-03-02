@@ -80,7 +80,7 @@ body .ace_scrollbar-h {
     padding: 0px;
     /* Position the tooltip */
     position: absolute;
-    z-index: 1;
+    z-index: 1000;
 }
 
 .exec-query {
