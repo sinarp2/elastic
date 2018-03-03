@@ -167,7 +167,6 @@ body {
 .shared-eventsviewer .normal.raw-event {
     background-color:inherit;
     border:none;
-    white-space:pre;
 }
 
 .event .json-event, .event .raw-event {
@@ -182,6 +181,7 @@ body {
 
 .shared-eventsviewer ul.condensed-selected-fields {
     margin: 5px 0 0;
+    padding-top: 5px;
     max-width: 100%;
 }
 
@@ -214,10 +214,11 @@ body {
 
 .shared-eventsviewer ul.condensed-selected-fields li .f-v:hover, .shared-eventsviewer ul.condensed-selected-fields li .more-fields:hover {
     color:#3863a0;
+    background-color: #fae4ad;
 }
 
 .event_source_key {
-    font-weight: bold;
+    /*font-weight: bold;*/
     color: #888;
     margin-right: 4px;
     float:left;
@@ -230,4 +231,12 @@ body {
     position:relative;
     word-break:normal;
     word-wrap:normal;
+}
+
+.pagination {
+    height: 27px !important;
+}
+
+.lazy-results-table.loading, .message-single, .shared-reportvisualizer .loading, .shared-reportvisualizer .visualization-message {
+    padding: 60px 20px;
 }

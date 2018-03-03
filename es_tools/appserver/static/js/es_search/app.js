@@ -36,21 +36,30 @@ require([
             el: $('.search-bar-wrapper.shared-searchbar')
         })
 
+        var bShowFields = true
         var eventview = new EventView({
-            el: $('.tab-content')
+            el: $('.search-results-eventspane-controls'),
+            "onShowFields": function(bShow) {
+                bShowFields = bShow
+            }
         })
 
         Backbone.Events.on('execQuery', function (pageNum, bRestore) {
             executeQuery(pageNum, bRestore)
         })
 
+        Backbone.Events.on('execError', function (message) {
+            //'No results found. Try expanding the time range.'
+            printMessage(message)
+        })
+
         function executeQuery(pageNum, bRestore) {
-            console.log('executeQuery', pageNum, bRestore)
             // 신규 검색
             // 필드 목록 추출
             if (bRestore) {
                 updateEventCount(0)
             }
+            printMessage('')
 
             var qo = QueryExec.tokenizeQuery(queryEditor.getValue())
             if (!qo) {
@@ -66,6 +75,8 @@ require([
             }
 
             try {
+                qo.size = 20
+                qo.bShowField = bShowFields
                 qo = QueryExec.buildQuery(qo, queryEditor.getTimeRange(), pageNum)
             } catch (e) {
                 showMessage('잘 못된 쿼리문장', e)
@@ -104,4 +115,12 @@ require([
             modal.show()
         }
 
+        function printMessage(message) {
+            var html = ''
+            if (message) {
+                // html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
+                html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
+            }
+            $('.message-single.search-results-shared-jobdispatchstatemessage').html(html)
+        }
     })

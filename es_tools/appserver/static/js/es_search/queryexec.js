@@ -12,14 +12,44 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
     }
 
     function hitsQuery(params) {
-        return doGet(params)
+        var q = $.Deferred()
+        var p = doGet(params)
+        p.done(function(res, status, xhr) {
+            var jo = {}
+            try {
+                jo = JSON.parse(res)
+                if (!jo.hits) {
+                    throw jo
+                }
+                if (jo.hits.total === 0) {
+                    throw 'No results found. Try expanding the time range.'
+                }
+            } catch (e) {
+                q.reject(e, res)
+            }
+            q.resolve(jo, status, xhr)
+        })
+        return q.promise()
     }
 
     function fieldsQuery(params) {
-        params.uri = params.index
+        params.uri = params.index || '_all'
+        params.uri = params.uri + '/_mappings'
         params.data = ''
 
-        return doGet(params)
+        var q = $.Deferred()
+        var p = doGet(params)
+        p.done(function(res, status, xhr) {
+            var jo = {}
+            try {
+                jo = JSON.parse(res)
+            } catch (e) {
+                console.log('json parsing error', e, status, res, xhr)
+                q.reject(e, res)
+            }
+            q.resolve(jo, status, xhr)
+        })
+        return q.promise()
     }
 
     function timelineQuery(params) {
@@ -71,7 +101,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         } catch (e) {
             throw e
         }
-        var size = (jo["size"]) ? jo["size"] : 10
+        var size = (qo["size"]) ? qo["size"] : 10
         jo["from"] = (page - 1) * size + 1
         jo["size"] = size
 

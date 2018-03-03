@@ -1,0 +1,55 @@
+<div class="fields-controls">
+    <div class="fields-controls-inner">
+        <a href="#" class="remove btn-pill" id="btn_hide_fields">
+            <i class="icon-chevron-left icon-no-underline"></i>
+            <span>Hide Fields</span>
+        </a>
+        <a href="#" class="all btn-pill" id="btn_all_fields">
+            <i class="icon-list icon-no-underline icon-large"></i>
+            <span>All Fields</span>
+        </a>
+    </div>
+</div>
+<div class="fieldsviewer-list search-results-eventspane-fieldsviewer-list">
+    <!--
+    <h6>Selected Fields</h6>
+    <ol class="selected-fields-list">
+        <li>
+            <a href="#" data-field-name="host" class="">
+                <span class="fields-type font-icon">a</span>
+                <span class="field-name">host</span>
+                <span class="field-count numeric">1</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-field-name="source" class="">
+                <span class="fields-type font-icon">a</span>
+                <span class="field-name">source</span>
+                <span class="field-count numeric">10</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" data-field-name="sourcetype" class="">
+                <span class="fields-type font-icon">a</span>
+                <span class="field-name">sourcetype</span>
+                <span class="field-count numeric">8</span>
+            </a>
+        </li>
+    </ol>
+    -->
+    <h6>Interesting Fields</h6>
+    <ol class="interesting-fields-list">
+        <%_.each(props, function(obj, key) {%>
+        <li>
+            <a href="#" data-field-name="component" class="">
+                <span class="fields-type font-icon"><% print(dataType(obj.type)) %></span>
+                <span class="field-name"><%=key%></span>
+                <span class="field-count numeric">15</span>
+            </a>
+        </li>
+        <%})%>
+    </ol>
+    <a href="#" class="additional-fields" title="show additional fields"> 113 more fields </a>
+    <a href="/en-US/app/Clay/field_extractor?sid=1519539711.365" class="extract-fields-button">
+        <i class="icon icon-plus"></i> Extract New Fields </a>
+</div>
