@@ -90,8 +90,6 @@ require([
             // 2. fields query
             // 3. data query
 
-            console.log('query content', qo)
-
             // // 3. data query
             // var defer = QueryExec.simpleQuery(qo)
             // defer.done(function (res, from) {
