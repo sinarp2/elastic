@@ -95,6 +95,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
     }
 
     function buildQuery(qo, timerange, page) {
+        console.log('buildQuery', timerange)
         var jo = {}
         try {
             jo = JSON.parse(qo.data)
@@ -108,7 +109,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         var range = {
             "range": {
                 "@timestamp": {
-                    "gte": "2017-11-22T00:05:50.000Z",
+                    "gte": timerange.gte,
                     "lte": timerange.lte,
                     "time_zone": "+09:00"
                 }
@@ -153,6 +154,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
             }
         }
         qo.data = JSON.stringify(jo)
+        qo.json = jo
         qo.from = jo.from
         qo.size = jo.size
         return qo

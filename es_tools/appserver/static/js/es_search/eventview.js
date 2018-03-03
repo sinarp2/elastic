@@ -46,9 +46,9 @@ define(["jquery", "underscore",
             var vm = this
             if (isNew) {
                 // 신규 검색
-                $.when(QueryExec.hitsQuery(qo),
-                    QueryExec.fieldsQuery(qo),
-                    QueryExec.timelineQuery(qo)).done(function (events, fields, timeln) {
+                $.when(QueryExec.hitsQuery(_.clone(qo)),
+                    QueryExec.fieldsQuery(_.clone(qo)),
+                    QueryExec.timelineQuery(_.clone(qo))).done(function (events, fields, timeln) {
                         vm.fieldview = new Fieldview({
                             "mappings": fields[0],
                             "el": ".search-results-eventspane-fieldsviewer"
@@ -62,7 +62,7 @@ define(["jquery", "underscore",
                     })
             } else {
                 // 페이징 처리
-                QueryExec.hitsQuery(qo).done(function (res, status, xhr) {
+                QueryExec.hitsQuery(_.clone(qo)).done(function (res, status, xhr) {
                     var html = vm.compile(res, null, null, qo.from)
                     vm.fieldview.cache()
                     vm.$el.html(html)

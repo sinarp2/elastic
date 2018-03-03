@@ -90,6 +90,8 @@ require([
             // 2. fields query
             // 3. data query
 
+            console.log(qo)
+
             // // 3. data query
             // var defer = QueryExec.simpleQuery(qo)
             // defer.done(function (res, from) {
@@ -114,6 +116,7 @@ require([
         }
 
         function printMessage(message) {
+            console.log('message', message)
             var html = ''
             if (message) {
                 // html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
