@@ -87,6 +87,8 @@ define([
                 editor2.setShowPrintMargin(false);
                 editor1.$blockScrolling = Infinity
                 editor2.$blockScrolling = Infinity
+                // editor2는 readonly
+                editor2.setReadOnly(true);
 
                 editor1.commands.addCommand({
                     name: "executeQuery",

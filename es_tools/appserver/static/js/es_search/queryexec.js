@@ -95,7 +95,21 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
     }
 
     function buildQuery(qo, timerange, page) {
-        console.log('buildQuery', timerange)
+
+        /**
+         * qo.data to json object
+         * applyTimeRange
+         *      - aggregation 일단 무시 -> query 문장 없이도 aggregation 할 수 있으므로
+         *          일단 query 문장은 있다고 가정함.
+         *      - if not query then convert to bool query
+         *      - find filter context and check has timerange condition
+         *      - 필터에 적용하기전 must 또는 should에 Timerange 조건이 있다면?
+         *      - query_string 또는 simple_query 인 경우 Timerange를 
+         *          All Time으로 설정하면 자체적인 시간 설정이 가능함.
+         * set from size
+         */
+        console.log('buildQuery -> timerange', timerange)
+
         var jo = {}
         try {
             jo = JSON.parse(qo.data)
@@ -115,17 +129,33 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
                 }
             }
         }
-        if (!jo.query) {
+        /**
+         * bool 쿼리로 전환 
+         * 
+         */
+        console.log('jo', jo)
+        if (!timerange.gte && !timerange.lte) {
+            // All time
+            // 날짜 설정하지 않음.
+        } else if (!jo.query) {
+            // query 속성이 없으면 단수 range 쿼리문으로
             jo['query'] = range
         } else if (jo.query.query_string ||
             jo.query.simple_query_string ||
             jo.query.terms_set) {
             // Timerange 기능 disable
             // 원 검색문 그대로 리턴
-        } else if (jo.query.range && jo.query.range["@timestamp"]) {
-            // range @timestamp 쿼리
-            // Timerange 기능 disable
-            // 원 검색문 그대로 리턴
+            console.log('buildQuery -> query_string query', jo)
+        } else if (jo.query.range) {
+            if (!jo.query.range["@timestamp"]) {
+                // range @timestamp 쿼리
+                // Timerange 기능 disable
+                // 원 검색문 그대로 리턴)
+                var ro = jo.query.range
+                if (_.isArray(ro)) {
+
+                }
+            }
         } else if (!jo.query.bool) {
             // match, match_all, terms ...
             var oldQuery = jo.query

@@ -39,10 +39,8 @@ define([
             this.timerange = {
                 idx: 0,
                 title: 'Last 24 hours',
-                data: {
-                    gte: '-24h/h',
-                    lte: 'now'
-                }
+                gte: '-24h/h',
+                lte: 'now'
             }
             this.delegateEvents()
             setTimeRangeTitle(this.timerange, this.canStore)
@@ -54,12 +52,13 @@ define([
     })
 
     function setPresets(e) {
+        console.log('setPresets', $(e.target).data())
         this.timerange = {
             type: 'Presets',
             idx: 0,
-            title: $(e.target).text(),
-            data: $(e.target).data()
+            title: $(e.target).text()
         }
+        _.extend(this.timerange, $(e.target).data())
         setTimeRangeTitle(this.timerange, this.canStore)
         toggleCalendar()
     }
