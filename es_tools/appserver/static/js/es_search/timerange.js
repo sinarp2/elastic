@@ -40,6 +40,17 @@ define([
         "-30d@d": () => moment().utc().subtract(1, 'm').format('YYYY-MM-DDT00:00:00')
     }
 
+    var datetimeRound = {
+        "/y" : "YYYY-01-01T00:00:00",
+        "/M" : "YYYY-MM-01T00:00:00",
+        "/d" : "YYYY-MM-DDT00:00:00",
+        "/h" : "YYYY-MM-DDThh:00:00",
+        "/m" : "YYYY-MM-DDThh:mm:00",
+        "/s" : "YYYY-MM-DDThh:mm:ss",
+        "/w" : "",
+        "other" : ""
+    }
+
     var view = Backbone.View.extend({
         "initialize": function () {
             if (typeof (Storage) !== "undefined") {
@@ -58,12 +69,14 @@ define([
             setCloseWindow()
         },
         "events": {
-            'click a.splBorder.btn': toggleCalendar,
-            'click .accordion-toggle': toggleAccordian,
-            'click .dropdown-toggle': toggleDropdown,
-            'click .presets-group > li > a': setPresets,
-            'click #apply-advenced': setAdvenced,
-            'keyup .advanced-timeinput-earliest .advanced-timeinput-latest': onKeyUpAdvenced
+            "click a.splBorder.btn": toggleCalendar,
+            "click .accordion-toggle": toggleAccordian,
+            "click .dropdown-toggle": toggleDropdown,
+            "click .presets-group > li > a": setPresets,
+            "click .apply-advenced": setAdvenced,
+            "click .mdy-input" : showCalender,
+            "keydown .advanced-timeinput-earliest": _.debounce(onKeyUpAdvenced, 250),
+            "keyup .advanced-timeinput-latest": _.debounce(onKeyUpAdvenced, 250)
         },
         "render": function () {
             this.$el.append(_.template(template));
@@ -82,21 +95,39 @@ define([
         }
     })
 
+    function showCalender(e) {
+        e.preventDefault()
+        $(e.target).datepicker()
+        console.log('calender', $(e.target).datepicker())
+    }
+
     function onKeyUpAdvenced(e) {
-        if (!e.target.value) {
+        
+        e.preventDefault()
+
+        var $p = $(e.target).parent()
+        var $span = $p.find('.shared-timerangepicker-dialog-advanced-timeinput-hint')
+        var $alert = $('.accordion-body:visible').find('.alerts.shared-flashmessages')
+        
+        $alert.hide()
+
+        if (e.target.value === 'now') {
+            $span.text(moment().utc().format())
             return
         }
-        var $p = $(e.target).parent()
-        var $span = $p.find('shared-timerangepicker-dialog-advanced-timeinput-hint')
-        var m = e.target.value.match(/(-\d+|\d+)(mon|[smhdwy])@(mon|[smhdy]|w[0-7])$|(-\d+|\d+)(mon|[smhdwy])$/)
+        var m = e.target.value.match(/(now-)(\d+)([yMdhms])(\/[yMdhms])?/)
         if (!m) {
-            $span.text('Invalid Format!')
-        } else {
-            if (m[1] && m[2] && m[3]) {
-                var n = parseInt(m[1], 10)
-                var u = m[2]
-            }
+            $span.text('Invalid Format')
+            $alert.show()
+            return
         }
+        
+        var num = parseInt(m[2], 10)
+        var unit = m[3]
+        var round = m[4] || 'other'
+
+        var t = moment().subtract(num, unit).utc().format(datetimeRound[round])
+        $span.text(t)
     }
 
     function setPresets(e) {

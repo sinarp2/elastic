@@ -15,6 +15,8 @@ require([
     "es/queryexec",
     "ace/ace",
     "text!../app/Clay/html/es_search.html",
+    "splunkjs/mvc/timerangeview",
+    "splunkjs/mvc/timelineview",
     'splunkjs/mvc/simplexml/ready!'
 ], function (
     $,
@@ -24,7 +26,9 @@ require([
     QueryEditor,
     QueryExec,
     ace,
-    es_search
+    es_search,
+    TimeRangeView,
+    TimelineView
 ) {
 
         $('.dashboard-title').prepend('<i class="icon-search-thin"></i> ')
@@ -43,6 +47,26 @@ require([
                 bShowFields = bShow
             }
         })
+
+        var mytimerange = new TimeRangeView({
+            id: "example-timerange",
+            preset: "Today",
+            el: $(".search-timerange")
+        }).render();
+
+        mytimerange.on("change", function() {
+            console.log('time change', mytimerange.val());
+        });
+
+        var mytimeline = new TimelineView({
+            id: "example-timeline",
+            el: $(".timeline-container")
+        }).render();
+        
+        // Update the search manager when the timeline changes
+        mytimeline.on("change", function() {
+            console.log('mytimeline change', mytimeline.val());
+        });
 
         Backbone.Events.on('execQuery', function (pageNum, bRestore) {
             executeQuery(pageNum, bRestore)

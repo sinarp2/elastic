@@ -335,7 +335,7 @@
                         </div>
                     </div>
                     <div class="form form-inline date-range-container">
-                        <div data-cid="view25447" class="shared-timerangepicker-dialog-dateandtimerange-rangepicker">
+                        <div class="shared-timerangepicker-dialog-dateandtimerange-rangepicker">
                             <div class="time-between-dates">
                                 <div class="earliest_picker col-1" style="display: block;">
                                     <span class="control shared-controls-datecontrol control-default">
@@ -444,15 +444,21 @@
             </div>
             <div class="accordion-body" style="display: none;">
                 <div class="accordion-inner form advanced-container shared-timerangepicker-dialog-advanced">
-                    <div class="alerts shared-flashmessages" style="display: none;"> </div>
+
+                    <div class="alerts shared-flashmessages" style="display:none">
+                        <div class="alert alert-error">
+                            <i class="icon-alert"></i> Invalid time. </div>
+                    </div>
+
                     <div class="timeinput pull-left shared-timerangepicker-dialog-advanced-timeinput earliest">
                         <div class="time-advanced">
                             <label class="control-label" title="Earliest:">Earliest:</label>
                             <div class="controls">
-                                <input class="advanced-timeinput-earliest" type="text" size="18" value="-24h@h">
+                                <input class="advanced-timeinput-earliest" type="text" size="18" value="now-24h/h">
                                 <span class="help-block help-block-timestamp">
                                     <span class="shared-timerangepicker-dialog-advanced-timeinput-hint">
-                                        2/19/18 6:00:00.000 PM </span>
+                                        <!--2/19/18 6:00:00.000 PM-->
+                                    </span>
                                 </span>
                             </div>
                         </div>
@@ -464,12 +470,13 @@
                                 <input class="advanced-timeinput-latest" type="text" size="18" value="now">
                                 <span class="help-block help-block-timestamp">
                                     <span class="shared-timerangepicker-dialog-advanced-timeinput-hint">
-                                        2/20/18 6:23:47.000 PM </span>
+                                        <!--2/19/18 6:00:00.000 PM-->
+                                    </span>
                                 </span>
                             </div>
                         </div>
                     </div>
-                    <button id="apply-advenced" class="apply es_btn">Apply</button>
+                    <button class="apply es_btn apply-advenced">Apply</button>
                     <!--
                     <a href="/en-US/help?location=learnmore.timerange.picker" target="_blank" title="Splunk help" class="btn-documentation">Documentation
                         <i class="icon-external"></i>

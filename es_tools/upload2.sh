@@ -44,8 +44,12 @@ scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/html/e
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_search/fieldview.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/css/es_search.css itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/css
 
+scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_search/queryeditor.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
+
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/html/es_timerange.html itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/html/
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_search/timerange.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_search/
+scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/html/es_queryeditor.html itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/html/
+
 
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_console/app.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_console/
 scp /Users/dosungroh/Downloads/Projects/elastic/es_tools/appserver/static/js/es_console/console.js itian@demo.zettadian.com:/home/itian/splunk-7.0.2/etc/apps/Clay/appserver/static/js/es_console/

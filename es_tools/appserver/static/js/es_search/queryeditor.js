@@ -8,35 +8,27 @@ define([
     "jquery",
     "underscore",
     "backbone",
-    "es/timerange",
     "text!../app/Clay/html/es_queryeditor.html"
-], function ($, _, Backbone,
-    TimeRange, template) {
+], function ($, _, Backbone, template) {
 
     var view = Backbone.View.extend({
-        initialize: function () {
+        "initialize": function () {
             this.render();
         },
-        getValue: function () {
+        "getValue": function () {
             return this.editor.getValue()
         },
-        getTimeRange: function () {
-            return this.timerange.getTimerange()
-        },
-        events: {
+        "events": {
             'click .search-button > a.btn': function () {
                 onEnterEditor(this.editor)
             }
         },
-        render: function () {
+        "render": function () {
             this.$el.html(_.template(template, {}));
             this.setupEditor()
             return this
         },
-        setupEditor: function () {
-            var timerange = new TimeRange({
-                el: $('.shared-timerangepicker')
-            })
+        "setupEditor": function () {
 
             var editor = ace.edit($(".ace_editor").get(0), {
                 mode: "ace/mode/text"
@@ -90,7 +82,6 @@ define([
 
             setInterval(saveQuery, 500, editor, this.canStore)
             this.editor = editor
-            this.timerange = timerange
         }
     })
 
