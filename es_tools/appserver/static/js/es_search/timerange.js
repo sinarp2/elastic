@@ -8,11 +8,40 @@ define([
     "jquery",
     "underscore",
     "backbone",
+    "moment",
     "text!../app/Clay/html/es_timerange.html"
-], function ($, _, Backbone, template) {
+], function ($, _, Backbone, moment, template) {
+
+    var datetime = {
+        "rt": () => moment().utc().format(),
+        "rt-30s": () => moment().utc().subtract(30, 's').format(),
+        "rt-1m": () => moment().utc().subtract(1, 's').format(),
+        "rt-5m": () => moment().utc().subtract(5, 'm').format(),
+        "rt-30m": () => moment().utc().subtract(30, 'm').format(),
+        "rt-1h": () => moment().utc().subtract(1, 'h').format(),
+        "now": () => moment().utc().format(),
+        "@d": () => moment().utc().format('YYYY-MM-DDT00:00:00'),
+        "@w0": () => moment().utc().weekday(0).format('YYYY-MM-DDT00:00:00'),
+        "@w1": () => moment().utc().weekday(1).format('YYYY-MM-DDT00:00:00'),
+        "-7d@w0": () => moment().utc().weekday(-7).format('YYYY-MM-DDT00:00:00'),
+        "-6d@w1": () => moment().utc().weekday(-6).format('YYYY-MM-DDT00:00:00'),
+        "-1d@w6": () => moment().utc().weekday(-2).format('YYYY-MM-DDT00:00:00'),
+        "@mon": () => moment().utc().date(1).format('YYYY-MM-DDT00:00:00'),
+        "@y": () => moment().utc().dayOfYear(1).format('YYYY-MM-DDT00:00:00'),
+        "-1d@d": () => moment().utc().subtract(1, 'd').format('YYYY-MM-DDT00:00:00'),
+        "@d": () => moment().utc().format('YYYY-MM-DDT00:00:00'),
+        "-1mon@mon": () => moment().utc().startOf('month').subtract(1, 'M').format('YYYY-MM-DDT00:00:00'),
+        "-1y@y": () => moment().utc().startOf('year').subtract(1, 'y').format('YYYY-MM-DDT00:00:00'),
+        "-15m": () => moment().utc().subtract(15, 'm').format(),
+        "-60m@m": () => moment().utc().subtract(60, 'm').format(),
+        "-4h@m": () => moment().utc().subtract(4, 'h').format(),
+        "-24h@h": () => moment().utc().subtract(24, 'h').format(),
+        "-7d@h": () => moment().utc().subtract(1, 'm').format(),
+        "-30d@d": () => moment().utc().subtract(1, 'm').format('YYYY-MM-DDT00:00:00')
+    }
 
     var view = Backbone.View.extend({
-        initialize: function () {
+        "initialize": function () {
             if (typeof (Storage) !== "undefined") {
                 this.canStore = true
                 if (sessionStorage.timerange) {
@@ -28,39 +57,78 @@ define([
             this.render()
             setCloseWindow()
         },
-        events: {
+        "events": {
             'click a.splBorder.btn': toggleCalendar,
             'click .accordion-toggle': toggleAccordian,
             'click .dropdown-toggle': toggleDropdown,
-            'click .presets-group > li > a': setPresets
+            'click .presets-group > li > a': setPresets,
+            'click #apply-advenced': setAdvenced,
+            'keyup .advanced-timeinput-earliest .advanced-timeinput-latest': onKeyUpAdvenced
         },
-        render: function () {
+        "render": function () {
             this.$el.append(_.template(template));
             this.timerange = {
                 idx: 0,
                 title: 'Last 24 hours',
-                gte: '-24h/h',
+                gte: '-24h@h',
                 lte: 'now'
             }
             this.delegateEvents()
             setTimeRangeTitle(this.timerange, this.canStore)
             return this
         },
-        getTimerange: function () {
+        "getTimerange": function () {
             return this.timerange
         }
     })
 
+    function onKeyUpAdvenced(e) {
+        if (!e.target.value) {
+            return
+        }
+        var $p = $(e.target).parent()
+        var $span = $p.find('shared-timerangepicker-dialog-advanced-timeinput-hint')
+        var m = e.target.value.match(/(-\d+|\d+)(mon|[smhdwy])@(mon|[smhdy]|w[0-7])$|(-\d+|\d+)(mon|[smhdwy])$/)
+        if (!m) {
+            $span.text('Invalid Format!')
+        } else {
+            if (m[1] && m[2] && m[3]) {
+                var n = parseInt(m[1], 10)
+                var u = m[2]
+            }
+        }
+    }
+
     function setPresets(e) {
-        console.log('setPresets', $(e.target).data())
         this.timerange = {
             type: 'Presets',
             idx: 0,
-            title: $(e.target).text()
+            runtime: ($(e.target).data().latest === 'rt'),
+            title: $(e.target).text(),
+            gte: getDateString($(e.target).data().gte),
+            lte: getDateString($(e.target).data().latest)
         }
-        _.extend(this.timerange, $(e.target).data())
         setTimeRangeTitle(this.timerange, this.canStore)
         toggleCalendar()
+        console.log('setPresets', this.timerange)
+    }
+
+    function setAdvenced(e) {
+
+        var $div1 = $($('.time-advanced')[0])
+        var $div2 = $($('.time-advanced')[1])
+        var gte = $div1.find('input').attr('value')
+        var lte = $div2.find('input').attr('value')
+
+        console.log('advenced earliest', $div1.find('input').attr('value'), $div2.find('input').attr('value'))
+    }
+
+    function getDateString(str) {
+        if (!str) {
+            return ""
+        } else {
+            return datetime[str]()
+        }
     }
 
     function setTimeRangeTitle(timerange, canStore) {

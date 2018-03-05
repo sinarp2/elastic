@@ -447,10 +447,10 @@
                     <div class="alerts shared-flashmessages" style="display: none;"> </div>
                     <div class="timeinput pull-left shared-timerangepicker-dialog-advanced-timeinput earliest">
                         <div class="time-advanced">
-                            <label class="control-label" for="view25501" title="Earliest:">Earliest:</label>
+                            <label class="control-label" title="Earliest:">Earliest:</label>
                             <div class="controls">
-                                <input type="text" size="18" value="-24h@h" id="view25501">
-                                <span id="hint_view25501" class="help-block help-block-timestamp">
+                                <input class="advanced-timeinput-earliest" type="text" size="18" value="-24h@h">
+                                <span class="help-block help-block-timestamp">
                                     <span class="shared-timerangepicker-dialog-advanced-timeinput-hint">
                                         2/19/18 6:00:00.000 PM </span>
                                 </span>
@@ -459,20 +459,21 @@
                     </div>
                     <div class="timeinput pull-left shared-timerangepicker-dialog-advanced-timeinput latest">
                         <div class="time-advanced">
-                            <label class="control-label" for="view25505" title="Latest:">Latest:</label>
+                            <label class="control-label" title="Latest:">Latest:</label>
                             <div class="controls">
-                                <input type="text" size="18" value="now" id="view25505">
-                                <span id="hint_view25505" class="help-block help-block-timestamp">
+                                <input class="advanced-timeinput-latest" type="text" size="18" value="now">
+                                <span class="help-block help-block-timestamp">
                                     <span class="shared-timerangepicker-dialog-advanced-timeinput-hint">
                                         2/20/18 6:23:47.000 PM </span>
                                 </span>
                             </div>
                         </div>
                     </div>
-                    <button class="apply es_btn" id="apply_view25488">Apply</button>
+                    <button id="apply-advenced" class="apply es_btn">Apply</button>
+                    <!--
                     <a href="/en-US/help?location=learnmore.timerange.picker" target="_blank" title="Splunk help" class="btn-documentation">Documentation
                         <i class="icon-external"></i>
-                    </a>
+                    </a>-->
                 </div>
             </div>
         </div>
