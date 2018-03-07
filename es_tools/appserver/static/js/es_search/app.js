@@ -13,9 +13,11 @@ require([
     "es/modalview",
     "es/queryeditor",
     "es/queryexec",
+    "es/datetimeModifier",
     "ace/ace",
     "text!../app/Clay/html/es_search.html",
     "splunkjs/mvc/timerangeview",
+    "splunkjs/mvc/searchmanager",
     "splunkjs/mvc/timelineview",
     'splunkjs/mvc/simplexml/ready!'
 ], function (
@@ -25,127 +27,159 @@ require([
     ModalView,
     QueryEditor,
     QueryExec,
+    DatetimeModifier,
     ace,
     es_search,
-    TimeRangeView,
-    TimelineView
+    TimeRangeView, SearchManager, TimelineView
 ) {
 
-        $('.dashboard-title').prepend('<i class="icon-search-thin"></i> ')
-        $('.dashboard-body').css('min-height', 0)
-        $('.dashboard-body').css('padding', '0 20px')
-        $(es_search).insertAfter($('.dashboard-body'))
+    $('.dashboard-title').prepend('<i class="icon-search-thin"></i> ')
+    $('.dashboard-body').css('min-height', 0)
+    $('.dashboard-body').css('padding', '0 20px')
+    $(es_search).insertAfter($('.dashboard-body'))
 
-        var queryEditor = new QueryEditor({
-            el: $('.search-bar-wrapper.shared-searchbar')
-        })
+    var modifier = new DatetimeModifier()
 
-        var bShowFields = true
-        var eventview = new EventView({
-            el: $('.search-results-eventspane-controls'),
-            "onShowFields": function(bShow) {
-                bShowFields = bShow
-            }
-        })
+    var queryEditor = new QueryEditor({
+        el: $('.search-bar-wrapper.shared-searchbar')
+    })
 
-        var mytimerange = new TimeRangeView({
-            id: "example-timerange",
-            preset: "Today",
-            el: $(".search-timerange")
-        }).render();
-
-        mytimerange.on("change", function() {
-            console.log('time change', mytimerange.val());
-        });
-
-        var mytimeline = new TimelineView({
-            id: "example-timeline",
-            el: $(".timeline-container")
-        }).render();
-        
-        // Update the search manager when the timeline changes
-        mytimeline.on("change", function() {
-            console.log('mytimeline change', mytimeline.val());
-        });
-
-        Backbone.Events.on('execQuery', function (pageNum, bRestore) {
-            executeQuery(pageNum, bRestore)
-        })
-
-        Backbone.Events.on('execError', function (message) {
-            //'No results found. Try expanding the time range.'
-            printMessage(message)
-        })
-
-        function executeQuery(pageNum, bRestore) {
-            // 신규 검색
-            // 필드 목록 추출
-            if (bRestore) {
-                updateEventCount(0)
-            }
-            printMessage('')
-
-            var qo = QueryExec.tokenizeQuery(queryEditor.getValue())
-            if (!qo) {
-                return
-            }
-            if (qo.method !== 'GET') {
-                showMessage('잘 못된 쿼리문장', '검색문장은 GET으로 시작하여야 합니다.')
-                return
-            }
-            if (qo.uri.indexOf('_search') < 0) {
-                showMessage('잘 못된 쿼리문장', '_search 키워드를 사용해 주세요.')
-                return
-            }
-
-            try {
-                qo.size = 20
-                qo.bShowField = bShowFields
-                qo = QueryExec.buildQuery(qo, queryEditor.getTimeRange(), pageNum)
-            } catch (e) {
-                showMessage('잘 못된 쿼리문장', e)
-                return
-            }
-
-            eventview.render(qo, bRestore)
-
-            // var qparams = QueryExec.getQueryParams(qo)
-            // 1. timeline query
-            // 2. fields query
-            // 3. data query
-
-            console.log(qo)
-
-            // // 3. data query
-            // var defer = QueryExec.simpleQuery(qo)
-            // defer.done(function (res, from) {
-            //     console.log('res', res, from)
-            //     eventview.render(res.hits, from)
-            //     updateEventCount(res.hits.total.toLocaleString())
-            // }).fail(function (res) {
-            //     console.log('fail', res)
-            // })
-        }
-
-        function updateEventCount(count) {
-            $('#tab_events').text(' Events (' + count + ')')
-        }
-
-        function showMessage(title, message) {
-            var modal = new ModalView({
-                title: title,
-                message: message
-            })
-            modal.show()
-        }
-
-        function printMessage(message) {
-            console.log('message', message)
-            var html = ''
-            if (message) {
-                // html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
-                html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
-            }
-            $('.message-single.search-results-shared-jobdispatchstatemessage').html(html)
+    var bShowFields = true
+    var eventview = new EventView({
+        el: $('.search-results-eventspane-controls'),
+        "onShowFields": function (bShow) {
+            bShowFields = bShow
         }
     })
+
+    var mytimerange = new TimeRangeView({
+        id: "example-timerange",
+        "managerid": "example-search",
+        preset: "Today",
+        el: $(".search-timerange")
+    }).render();
+
+    // Instantiate components
+    var mysearch = new SearchManager({
+        id: "example-search",
+        preview: true,
+        search: "index=_internal | head 100",
+        status_buckets: 300,
+        required_field_list: "*"
+    });
+    var mytimeline = new TimelineView({
+        id: "example-timeline",
+        managerid: "example-search",
+        el: $(".timeline-container")
+    }).render();
+
+    mytimerange.on("change", function () {
+
+        var gte = mytimerange.val().earliest_time
+        var lte = mytimerange.val().latest_time
+
+        var isRuntime = (gte && gte.indexOf('rt') === 0)
+
+        if (gte === 'rt' && lte === 'rt') {
+            // All time, runtime
+            gte = 0
+            lte = ''
+        } else if (gte === 0 && lte === '') {
+            // All time, not runtime
+            gte = 0
+            lte = ''
+        } else {
+            gte = modifier.convertToUTC(mytimerange.val().earliest_time)
+            lte = modifier.convertToUTC(mytimerange.val().latest_time)
+        }
+        this.timerange = {
+            runtime: isRuntime,
+            gte: gte,
+            lte: lte
+        }
+        executeQuery(1, true)
+
+    });
+
+    Backbone.Events.on('execQuery', function (pageNum, bRestore) {
+        executeQuery(pageNum, bRestore)
+    })
+
+    Backbone.Events.on('execError', function (message) {
+        //'No results found. Try expanding the time range.'
+        printMessage(message)
+    })
+
+    function executeQuery(pageNum, bRestore) {
+        // 신규 검색
+        // 필드 목록 추출
+        if (bRestore) {
+            updateEventCount(0)
+        }
+        printMessage('')
+
+        var qo = QueryExec.tokenizeQuery(queryEditor.getValue())
+        if (!qo) {
+            return
+        }
+        if (qo.method !== 'GET') {
+            showMessage('잘 못된 쿼리문장', '검색문장은 GET으로 시작하여야 합니다.')
+            return
+        }
+        if (qo.uri.indexOf('_search') < 0) {
+            showMessage('잘 못된 쿼리문장', '_search 키워드를 사용해 주세요.')
+            return
+        }
+
+        try {
+            qo.size = 20
+            qo.bShowField = bShowFields
+            console.log('timeline', mytimerange)
+            qo = QueryExec.buildQuery(qo, mytimerange.timerange, pageNum)
+        } catch (e) {
+            showMessage('잘 못된 쿼리문장', e)
+            return
+        }
+
+        eventview.render(qo, bRestore)
+
+        // var qparams = QueryExec.getQueryParams(qo)
+        // 1. timeline query
+        // 2. fields query
+        // 3. data query
+
+        console.log(qo)
+
+        // // 3. data query
+        // var defer = QueryExec.simpleQuery(qo)
+        // defer.done(function (res, from) {
+        //     console.log('res', res, from)
+        //     eventview.render(res.hits, from)
+        //     updateEventCount(res.hits.total.toLocaleString())
+        // }).fail(function (res) {
+        //     console.log('fail', res)
+        // })
+    }
+
+    function updateEventCount(count) {
+        $('#tab_events').text(' Events (' + count + ')')
+    }
+
+    function showMessage(title, message) {
+        var modal = new ModalView({
+            title: title,
+            message: message
+        })
+        modal.show()
+    }
+
+    function printMessage(message) {
+        console.log('message', message)
+        var html = ''
+        if (message) {
+            // html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
+            html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
+        }
+        $('.message-single.search-results-shared-jobdispatchstatemessage').html(html)
+    }
+})

@@ -40,15 +40,47 @@ define([
         "-30d@d": () => moment().utc().subtract(1, 'm').format('YYYY-MM-DDT00:00:00')
     }
 
+    var dtRound = {
+        "@y": "YYYY-01-01T00:00:00",
+        "@mon": "YYYY-MM-01T00:00:00",
+        "@d": "YYYY-MM-DDT00:00:00",
+        "@h": "YYYY-MM-DDThh:00:00",
+        "@m": "YYYY-MM-DDThh:mm:00",
+        "@s": "YYYY-MM-DDThh:mm:ss",
+        "@w0": "",
+        "@w1": "",
+        "-": (mom, num, unit, round) => {
+            return mom.subtract(num, unit)
+        },
+        "+": (mom, num, unit, round) => {
+            return mom.add(num, unit)
+        }
+    }
+
     var datetimeRound = {
-        "/y" : "YYYY-01-01T00:00:00",
-        "/M" : "YYYY-MM-01T00:00:00",
-        "/d" : "YYYY-MM-DDT00:00:00",
-        "/h" : "YYYY-MM-DDThh:00:00",
-        "/m" : "YYYY-MM-DDThh:mm:00",
-        "/s" : "YYYY-MM-DDThh:mm:ss",
-        "/w" : "",
-        "other" : ""
+        "/y": "YYYY-01-01T00:00:00",
+        "/M": "YYYY-MM-01T00:00:00",
+        "/d": "YYYY-MM-DDT00:00:00",
+        "/h": "YYYY-MM-DDThh:00:00",
+        "/m": "YYYY-MM-DDThh:mm:00",
+        "/s": "YYYY-MM-DDThh:mm:ss",
+        "/w": "",
+        "other": ""
+    }
+
+    function patternToUTC(mod) {
+        if (!mod) {
+            return null
+        }
+        var match = mod.match(/(-|\+)(\d+)(mon|[ydhmsw])($|@mon|@[ydhmsw]|@w[0-7])$/)
+        if (!match) {
+            return null
+        }
+        var plus_minus = match[1]
+        var num = match[2]
+        var unit = match[3]
+        var round = match[4]
+
     }
 
     var view = Backbone.View.extend({
@@ -74,7 +106,7 @@ define([
             "click .dropdown-toggle": toggleDropdown,
             "click .presets-group > li > a": setPresets,
             "click .apply-advenced": setAdvenced,
-            "click .mdy-input" : showCalender,
+            "click .mdy-input": showCalender,
             "keydown .advanced-timeinput-earliest": _.debounce(onKeyUpAdvenced, 250),
             "keyup .advanced-timeinput-latest": _.debounce(onKeyUpAdvenced, 250)
         },
@@ -102,13 +134,13 @@ define([
     }
 
     function onKeyUpAdvenced(e) {
-        
+
         e.preventDefault()
 
         var $p = $(e.target).parent()
         var $span = $p.find('.shared-timerangepicker-dialog-advanced-timeinput-hint')
         var $alert = $('.accordion-body:visible').find('.alerts.shared-flashmessages')
-        
+
         $alert.hide()
 
         if (e.target.value === 'now') {
@@ -121,7 +153,7 @@ define([
             $alert.show()
             return
         }
-        
+
         var num = parseInt(m[2], 10)
         var unit = m[3]
         var round = m[4] || 'other'
