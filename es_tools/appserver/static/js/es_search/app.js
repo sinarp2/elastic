@@ -9,6 +9,7 @@ require.config({
 require([
     "jquery",
     "backbone",
+    "moment",
     "es/eventview",
     "es/modalview",
     "es/queryeditor",
@@ -19,10 +20,12 @@ require([
     "splunkjs/mvc/timerangeview",
     "splunkjs/mvc/searchmanager",
     "splunkjs/mvc/timelineview",
+    "splunkjs/mvc/eventsviewerview",
     'splunkjs/mvc/simplexml/ready!'
 ], function (
     $,
     Backbone,
+    moment,
     EventView,
     ModalView,
     QueryEditor,
@@ -30,7 +33,7 @@ require([
     DatetimeModifier,
     ace,
     es_search,
-    TimeRangeView, SearchManager, TimelineView
+    TimeRangeView, SearchManager, TimelineView, EventsViewer
 ) {
 
     $('.dashboard-title').prepend('<i class="icon-search-thin"></i> ')
@@ -59,22 +62,46 @@ require([
         el: $(".search-timerange")
     }).render();
 
+    mytimerange.timerange = {
+        runtime: false,
+        gte: moment().utc().format('YYYY-MM-DDT00:00:00.000+00:00'),
+        lte: moment().utc().format('YYYY-MM-DDThh:mm:ss.000+00:00')
+    }
+
     // Instantiate components
-    var mysearch = new SearchManager({
-        id: "example-search",
-        preview: true,
-        search: "index=_internal | head 100",
-        status_buckets: 300,
-        required_field_list: "*"
-    });
+    // var mysearch = new SearchManager({
+    //     id: "example-search",
+    //     preview: true,
+    //     search: '| esproxy "http://211.234.125.15:29200/dhcp*/_search" "{ \"size\":20, \"query\": { \"match_all\" : {} } }" | timechart count',
+    //     // search: 'index=_internal | head 20',
+    //     //| esproxy "http://211.234.125.15:29200/dhcp*/_search" "{\"size\":40,\"query\":{\"match_all\":{}}}"
+    //     status_buckets: 300,
+    //     required_field_list: "*"
+    // });
+
+    // mysearch.on('search:done', function(e) {
+    //     console.log('search done', e)
+    //     console.log('data', mysearch.get("data"))
+    //     console.log('job', mysearch.getJobResponse())
+    // })
+
+    // var listviewer = new EventsViewer({
+    //     id: "example-eventsviewer-list",
+    //     managerid: "example-search",
+    //     type: "raw",
+    //     pagerPosition: "top",
+    //     showPager: true,
+    //     rowNumbers: false,
+    //     el: $(".search-results-eventspane-controls")
+    // }).render();
+
     var mytimeline = new TimelineView({
         id: "example-timeline",
         managerid: "example-search",
         el: $(".timeline-container")
     }).render();
 
-    mytimerange.on("change", function () {
-
+    mytimerange.on("change", function (e) {
         var gte = mytimerange.val().earliest_time
         var lte = mytimerange.val().latest_time
 
@@ -98,8 +125,7 @@ require([
             lte: lte
         }
         executeQuery(1, true)
-
-    });
+    })
 
     Backbone.Events.on('execQuery', function (pageNum, bRestore) {
         executeQuery(pageNum, bRestore)
@@ -176,10 +202,13 @@ require([
     function printMessage(message) {
         console.log('message', message)
         var html = ''
+        var $msg = $('.message-single.search-results-shared-jobdispatchstatemessage')
         if (message) {
-            // html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
             html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
+            $msg.show()
+        } else {
+            $msg.hide()
         }
-        $('.message-single.search-results-shared-jobdispatchstatemessage').html(html)
+        $msg.html(html)
     }
 })
