@@ -24,7 +24,28 @@ define(["jquery",
             var vm = this
             vm.properties = {}
             vm.el = options.el
-            var mappings = options.mappings
+            vm._fetchFields(options.mappings)
+        },
+        "render": function () {
+            var vm = this
+            $(vm.el).html(vm.html)
+        },
+        "cache": function () {
+            var vm = this
+            vm.html = $(vm.el).html()
+        },
+        "dataType": function (type) {
+            var ch = '?'
+            _.some(fieldTypes, function (val, key) {
+                if (key.indexOf(type) > -1) {
+                    ch = val
+                    return true
+                }
+            })
+            return ch
+        },
+        "_fetchFields": function (mappings) {
+            var vm = this
             _.defer(function () {
                 _.some(mappings, function (indexObj, indexName) {
                     if (indexName.indexOf('.') === 0) {
@@ -48,24 +69,6 @@ define(["jquery",
                     $(vm.el).html(vm.html)
                 }
             })
-        },
-        "render": function () {
-            var vm = this
-            $(vm.el).html(vm.html)
-        },
-        "cache": function () {
-            var vm = this
-            vm.html = $(vm.el).html()
-        },
-        "dataType": function (type) {
-            var ch = '?'
-            _.some(fieldTypes, function (val, key) {
-                if (key.indexOf(type) > -1) {
-                    ch = val
-                    return true
-                }
-            })
-            return ch
         }
     })
 })

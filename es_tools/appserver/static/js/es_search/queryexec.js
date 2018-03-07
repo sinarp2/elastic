@@ -19,13 +19,16 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
             try {
                 jo = JSON.parse(res)
                 if (!jo.hits) {
-                    throw jo
+                    q.reject(jo)
+                    return
                 }
                 if (jo.hits.total === 0) {
-                    throw 'No results found. Try expanding the time range.'
+                    q.reject('No results found. Try expanding the time range.')
+                    return
                 }
             } catch (e) {
                 q.reject(e, res)
+                return
             }
             q.resolve(jo, status, xhr)
         })
@@ -46,6 +49,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
             } catch (e) {
                 console.log('json parsing error', e, status, res, xhr)
                 q.reject(e, res)
+                return
             }
             q.resolve(jo, status, xhr)
         })
@@ -188,25 +192,5 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         qo.from = jo.from
         qo.size = jo.size
         return qo
-    }
-
-    function checkResultData(data) {
-        var result = {
-            status: 'OK',
-            data: null
-        }
-        try {
-            var jo = JSON.parse(data);
-            if (jo.hits) {
-                result.data = jo
-            } else {
-                result.status = 'NO'
-                result.data = jo
-            }
-        } catch (e) {
-            result.status = 'NO'
-            result.data = e
-        }
-        return result
     }
 })

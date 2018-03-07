@@ -49,6 +49,7 @@ define(["jquery", "underscore",
                 $.when(QueryExec.hitsQuery(_.clone(qo)),
                     QueryExec.fieldsQuery(_.clone(qo)),
                     QueryExec.timelineQuery(_.clone(qo))).done(function (events, fields, timeln) {
+                        console.log('query', events[0])
                         vm.fieldview = new Fieldview({
                             "mappings": fields[0],
                             "el": ".search-results-eventspane-fieldsviewer"
@@ -57,8 +58,11 @@ define(["jquery", "underscore",
                         vm.$el.html(html)
                         vm.fieldview.render()
                         vm.showFields(qo.bShowField)
+                        // 초기 로딩 시 만 
+                        Backbone.Events.trigger('execComplete')
                     }).fail(function (e) {
                         Backbone.Events.trigger('execError', e)
+                        vm.$el.html('')
                     })
             } else {
                 // 페이징 처리
@@ -70,6 +74,7 @@ define(["jquery", "underscore",
                     vm.showFields(qo.bShowField)
                 }).fail(function (e) {
                     Backbone.Events.trigger('execError', e)
+                    vm.$el.html('')
                 })
             }
         },
