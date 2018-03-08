@@ -114,6 +114,11 @@ body {
     word-wrap:break-word;
 }
 
+.search-results-eventspane-fieldsviewer ol > li > a .field-count {
+    color:#999;
+    padding-left:3px;
+}
+
 .search-results-eventspane-fieldsviewer ol {
     list-style: none;
     margin: 0;

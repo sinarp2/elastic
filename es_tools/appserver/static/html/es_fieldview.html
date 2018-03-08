@@ -39,17 +39,18 @@
     -->
     <h6>Interesting Fields</h6>
     <ol class="interesting-fields-list">
-        <%_.each(props, function(obj, key) {%>
+        <%_.each(fields, function(obj, key) {
+            cardinality = aggs[key].value %>
         <li>
             <a href="#" data-field-name="component" class="">
                 <span class="fields-type font-icon"><% print(dataType(obj.type)) %></span>
                 <span class="field-name"><%=key%></span>
-                <span class="field-count numeric">15</span>
+                <span class="field-count numeric"><% print((cardinality > 100) ? '100+': cardinality) %></span>
             </a>
         </li>
         <%})%>
     </ol>
-    <a href="#" class="additional-fields" title="show additional fields"> 113 more fields </a>
-    <a href="/en-US/app/Clay/field_extractor?sid=1519539711.365" class="extract-fields-button">
-        <i class="icon icon-plus"></i> Extract New Fields </a>
+    <%if (_.size(totalSize) > maxFields) {%>
+    <a href="#" class="additional-fields" title="show additional fields"> <% print(_.size(totalSize) - maxFields) %> more fields </a>
+    <%}%>
 </div>

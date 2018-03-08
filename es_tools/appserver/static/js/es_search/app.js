@@ -11,6 +11,7 @@ require([
     "backbone",
     "moment",
     "es/eventview",
+    "es/fieldview",
     "es/modalview",
     "es/queryeditor",
     "es/queryexec",
@@ -26,6 +27,7 @@ require([
     Backbone,
     moment,
     EventView,
+    FieldView,
     ModalView,
     QueryEditor,
     QueryExec,
@@ -36,232 +38,279 @@ require([
     SearchManager,
     TimelineView
 ) {
-        $('.dashboard-title').prepend('<i class="icon-search-thin"></i> ')
-        $('.dashboard-body').css('min-height', 0)
-        $('.dashboard-body').css('padding', '0 20px')
-        $(es_search).insertAfter($('.dashboard-body'))
+    $('.dashboard-title').prepend('<i class="icon-search-thin"></i> ')
+    $('.dashboard-body').css('min-height', 0)
+    $('.dashboard-body').css('padding', '0 20px')
+    $(es_search).insertAfter($('.dashboard-body'))
 
-        var bShowFields = true
+    var bShowFields = true
+    var queryObject = {}
+    var modifier = new DatetimeModifier()
 
-        var modifier = new DatetimeModifier()
+    var queryEditor = new QueryEditor({
+        el: $('.search-bar-wrapper.shared-searchbar')
+    })
 
-        var queryEditor = new QueryEditor({
-            el: $('.search-bar-wrapper.shared-searchbar')
-        })
+    var fieldview = null
+    /*
+     * EventView
+     */
+    var eventview = null
 
-        /*
-        * EventView
-        */
-        var eventview = new EventView({
-            el: $('.search-results-eventspane-controls'),
-            "onShowFields": function (bShow) {
-                bShowFields = bShow
-            }
-        })
+    /*
+     * TimeRangeView
+     */
+    var mytimerange = new TimeRangeView({
+        id: "example-timerange",
+        "managerid": "example-search",
+        preset: "Today",
+        el: $(".search-timerange")
+    }).render()
 
-        /*
-        * TimeRangeView
-        */
-        var mytimerange = new TimeRangeView({
-            id: "example-timerange",
-            "managerid": "example-search",
-            preset: "Today",
-            el: $(".search-timerange")
-        }).render()
+    mytimerange.timerange = {
+        runtime: false,
+        gte: moment().utc().format('YYYY-MM-DDT00:00:00.000+00:00'),
+        lte: moment().utc().format('YYYY-MM-DDThh:mm:ss.000+00:00'),
+        timezone: "+09:00"
+    }
 
-        mytimerange.timerange = {
-            runtime: false,
-            gte: moment().utc().format('YYYY-MM-DDT00:00:00.000+00:00'),
-            lte: moment().utc().format('YYYY-MM-DDThh:mm:ss.000+00:00')
-        }
+    mytimerange.runtimeMod = {
+        "s": 1000,
+        "m": 60000,
+        "h": 3600000
+    }
 
-        mytimerange.runtimeMod = {
-            "s": 1000,
-            "m": 60000,
-            "h": 3600000
-        }
+    mytimerange.on("change", function (e) {
+        setTimerange()
+        executeQuery(1, true)
+    })
 
-        mytimerange.on("change", function (e) {
-            setTimerange()
-            executeQuery(1, true)
-        })
-        
-        /*
-        * SearchManager
-        */
-        var mysearch = new SearchManager({
-            id: "example-search",
-            preview: true,
-            search: ' | esproxy "http://211.234.125.15:29200/dhcp*/_search" "{ \\"size\\":20, \\"query\\": { \\"match_all\\" : {} } }" ',
-            status_buckets: 300,
-            required_field_list: "*"
-        })
+    /*
+     * SearchManager
+     */
+    var mysearch = new SearchManager({
+        id: "example-search",
+        preview: true,
+        search: ' | esproxy "http://211.234.125.15:29200/dhcp*/_search" "{ \\"size\\":20, \\"query\\": { \\"match_all\\" : {} } }" ',
+        status_buckets: 300,
+        required_field_list: "*"
+    })
 
-        mysearch.on('search:done', function (e) {
-            console.log('search done', e)
-            console.log('data', mysearch.get("data"))
-            console.log('job', mysearch.getJobResponse())
-        })
+    mysearch.on('search:done', function (e) {
+        console.log('search done', e)
+        console.log('data', mysearch.get("data"))
+        console.log('job', mysearch.getJobResponse())
+    })
 
-        var mytimeline = new TimelineView({
-            id: "example-timeline",
-            managerid: "example-search",
-            el: $(".timeline-container")
-        }).render()
+    var mytimeline = new TimelineView({
+        id: "example-timeline",
+        managerid: "example-search",
+        el: $(".timeline-container")
+    }).render()
 
-        mytimeline.on("change", function(e) {
-            console.log('mytimeline changed', e, mytimeline.val())
-            // mysearch.search.set(mytimeline.val());
-        })
+    mytimeline.on("change", function (e) {
+        console.log('mytimeline changed', e, mytimeline.val())
+        // mysearch.search.set(mytimeline.val());
+    })
 
-        // var listviewer = new EventsViewer({
-        //     id: "example-eventsviewer-list",
-        //     managerid: "example-search",
-        //     type: "raw",
-        //     pagerPosition: "top",
-        //     showPager: true,
-        //     rowNumbers: false,
-        //     el: $(".search-results-eventspane-controls")
-        // }).render()
+    // var listviewer = new EventsViewer({
+    //     id: "example-eventsviewer-list",
+    //     managerid: "example-search",
+    //     type: "raw",
+    //     pagerPosition: "top",
+    //     showPager: true,
+    //     rowNumbers: false,
+    //     el: $(".search-results-eventspane-controls")
+    // }).render()
 
 
-        function executeQuery(pageNum, bRestore) {
+    function executeQuery(pageNum, bRestore) {
+
+        if (bRestore) {
             // 신규 검색
-            // 필드 목록 추출
-            if (bRestore) {
-                updateEventCount(0)
-                printMessage('No results yet found.', 'info')
-                if (mytimerange.timerange.timeout) {
-                    console.log('timeout check', mytimerange.timerange.timeout)
-                    if (mytimerange.runtimeId) {
-                        //cancelTimeout(mytimerange.runtimeId)
+            if (eventview) {
+                eventview.close()
+            }
+            updateEventCount(0)
+            printMessage('No results yet found.', 'info')
+        } else {
+            // pagination query
+            printMessage()
+        }
+
+        if (!makeQueryObject(pageNum, bRestore)) {
+            return
+        }
+
+        if (bRestore) {
+            var qo = $.extend(true, {}, queryObject);
+            QueryExec.fieldsQuery(qo).done(function (res) {
+                fieldview = new FieldView({
+                    "mappings": res,
+                    "el": ".search-results-eventspane-fieldsviewer",
+                    "maxFields": 12
+                })
+                eventview = new EventView({
+                    "el": $('.search-results-eventspane-controls'),
+                    "onShowFields": function (bShow) {
+                        bShowFields = bShow
                     }
-                    mytimerange.runtimeId = setTimeout(function() {
-                        setTimerange()
-                        executeQuery(1, true)
-                    }, mytimerange.timerange.timeout)
-                }
-            } else {
-                printMessage()
-            }
-
-            var qo = QueryExec.tokenizeQuery(queryEditor.getValue())
-            if (!qo) {
-                return
-            }
-            if (qo.method !== 'GET') {
-                showMessage('잘 못된 쿼리문장', '검색문장은 GET으로 시작하여야 합니다.')
-                return
-            }
-            if (qo.uri.indexOf('_search') < 0) {
-                showMessage('잘 못된 쿼리문장', '_search 키워드를 사용해 주세요.')
-                return
-            }
-
-            try {
-                qo.size = 20
-                qo.bShowField = bShowFields
-                qo = QueryExec.buildQuery(qo, mytimerange.timerange, pageNum)
-            } catch (e) {
-                showMessage('잘 못된 쿼리문장', e)
-                return
-            }
-
-            eventview.render(qo, bRestore)
-
-            // var qparams = QueryExec.getQueryParams(qo)
-            // 1. timeline query
-            // 2. fields query
-            // 3. data query
-
-            console.log(qo)
-
-            // // 3. data query
-            // var defer = QueryExec.simpleQuery(qo)
-            // defer.done(function (res, from) {
-            //     console.log('res', res, from)
-            //     eventview.render(res.hits, from)
-            //     updateEventCount(res.hits.total.toLocaleString())
-            // }).fail(function (res) {
-            //     console.log('fail', res)
-            // })
-        }
-
-        function updateEventCount(count) {
-            $('#tab_events').text(' Events (' + count + ')')
-        }
-
-        function showMessage(title, message) {
-            var modal = new ModalView({
-                title: title,
-                message: message
+                })
             })
-            modal.show()
+        } else {
+            var qo = $.extend(true, {}, queryObject);
+            QueryExec.hitsQuery(qo).done(function (res) {
+                res.hits.from = qo.from
+                eventview.render(res.hits, bShowFields)
+                fieldview.render()
+            })
         }
+    }
 
-        function printMessage(message, type) {
-            var html = ''
-            var $msg = $('.message-single.search-results-shared-jobdispatchstatemessage')
-            if (message) {
-                if (type === 'info') {
-                    html = '<div class="alert alert-info"><i class="icon-alert"></i>' + message + '</div>'
-                } else {
-                    html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
-                }
-                $msg.show()
+    function updateEventCount(count) {
+        $('#tab_events').text(' Events (' + count + ')')
+    }
+
+    function showMessage(title, message) {
+        var modal = new ModalView({
+            title: title,
+            message: message
+        })
+        modal.show()
+    }
+
+    function printMessage(message, type) {
+        var html = ''
+        var $msg = $('.message-single.search-results-shared-jobdispatchstatemessage')
+        if (message) {
+            if (type === 'info') {
+                html = '<div class="alert alert-info"><i class="icon-alert"></i>' + message + '</div>'
             } else {
-                $msg.hide()
+                html = '<div class="alert alert-error"><i class="icon-alert"></i>' + message + '</div>'
             }
-            $msg.html(html)
+            $msg.show()
+        } else {
+            $msg.hide()
         }
+        $msg.html(html)
+    }
 
-        function getTimeout(isRuntime, gte) {
-            if (isRuntime) {
-                var m = gte.match(/rt-(\d+)([smh])$/)
-                if (!m) {
-                    //
-                    console.log('timerange.timeout=', m, gte)
-                } else {
-                    var num = parseInt(m[1], 10)
-                    return num * mytimerange.runtimeMod[m[2]]
-                }
-            }
-            return 0       
-        }
-
-        function setTimerange() {
-            var mtr = mytimerange
-            var gte = mtr.val().earliest_time
-            var lte = mtr.val().latest_time
-            
-            mtr.timerange.isRuntime = (gte && gte.indexOf('rt') === 0)
-            if (gte === 'rt' && lte === 'rt') {
-                // runtime
-                mtr.timerange.gte = 0
-                mtr.timerange.lte = ''
-            } else if (gte === 0 && lte === '') {
-                // All time, not runtime
-                mtr.timerange.gte = 0
-                mtr.timerange.lte = ''
+    function getTimeout(isRuntime, gte) {
+        if (isRuntime) {
+            var m = gte.match(/rt-(\d+)([smh])$/)
+            if (!m) {
+                //
+                console.log('timerange.timeout=', m, gte)
             } else {
-                mtr.timerange.gte = modifier.convertToUTC(mtr.val().earliest_time)
-                mtr.timerange.lte = modifier.convertToUTC(mtr.val().latest_time)
+                var num = parseInt(m[1], 10)
+                return num * mytimerange.runtimeMod[m[2]]
             }
-            mtr.timerange.timeout = getTimeout(mtr.timerange.isRuntime, gte)
+        }
+        return 0
+    }
+
+    function setTimeoutQuery() {
+        if (mytimerange.timerange.timeout) {
+            console.log('timeout check', mytimerange.timerange.timeout)
+            if (mytimerange.runtimeId) {
+                //cancelTimeout(mytimerange.runtimeId)
+            }
+            mytimerange.runtimeId = setTimeout(function () {
+                setTimerange()
+                executeQuery(1, true)
+            }, mytimerange.timerange.timeout)
+        }
+    }
+
+    function setTimerange() {
+        var mtr = mytimerange
+        var gte = mtr.val().earliest_time
+        var lte = mtr.val().latest_time
+
+        mtr.timerange.isRuntime = (gte && gte.indexOf('rt') === 0)
+        if (gte === 'rt' && lte === 'rt') {
+            // runtime
+            mtr.timerange.gte = 0
+            mtr.timerange.lte = ''
+        } else if (gte === 0 && lte === '') {
+            // All time, not runtime
+            mtr.timerange.gte = 0
+            mtr.timerange.lte = ''
+        } else {
+            mtr.timerange.gte = modifier.convertToUTC(mtr.val().earliest_time)
+            mtr.timerange.lte = modifier.convertToUTC(mtr.val().latest_time)
+        }
+        mtr.timerange.timeout = getTimeout(mtr.timerange.isRuntime, gte)
+    }
+
+    function makeQueryObject(pageNum, bRestore) {
+        if (!bRestore) {
+            queryObject = QueryExec.applyPagination(queryObject, pageNum)
+            return true
         }
 
-        Backbone.Events.on('execQuery', function (pageNum, bRestore) {
-            executeQuery(pageNum, bRestore)
-        })
+        queryObject = QueryExec.getQueryObject(queryEditor.getValue())
 
-        Backbone.Events.on('execError', function (message) {
-            printMessage(message)
-        })
-        Backbone.Events.on('execComplete', function (message) {
-            printMessage('')
-        })
+        if (!queryObject) {
+            return false
+        }
+        if (queryObject.method !== 'GET') {
+            showMessage('잘 못된 쿼리문장', '검색문장은 GET으로 시작하여야 합니다.')
+            return false
+        }
+        if (queryObject.uri.indexOf('_search') < 0) {
+            showMessage('잘 못된 쿼리문장', '_search 키워드를 사용해 주세요.')
+            return false
+        }
+        if (!queryObject.json) {
+            showMessage('잘 못된 쿼리문장', '문장을 확인해 주세요.')
+            return false
+        }
 
-        setTimeout(function () {
-            Backbone.Events.trigger('execQuery', 1, true)
+        queryObject.size = 10
+        queryObject.bShowField = bShowFields
+        queryObject = QueryExec.applyTimeRange(queryObject, mytimerange.timerange)
+        queryObject = QueryExec.applyPagination(queryObject, pageNum)
+
+        return true
+    }
+
+    Backbone.Events.on('execQuery', function (pageNum, bRestore) {
+        executeQuery(pageNum, bRestore)
+    })
+
+    Backbone.Events.on('printMessage', function (message) {
+        printMessage(message)
+    })
+
+    Backbone.Events.on('eventViewRendered', function (message) {
+        console.log('eventViewRendered', fieldview.aggs)
+        fieldview.render()
+        printMessage('')
+    })
+
+    Backbone.Events.on('setUserTimerange', function (range) {
+        console.log('setUserTimerange', range)
+    })
+
+    Backbone.Events.on('aggsReady', function (aggs) {
+        var qo = $.extend(true, {}, queryObject);
+        qo.json = _.extend(qo.json, {
+            "aggs": aggs
+        })
+        qo.data = JSON.stringify(qo.json)
+        QueryExec.hitsQuery(qo).done(function (res) {
+            res.hits.from = qo.from
+            fieldview.aggs = res.aggregations
+            eventview.render(res.hits, bShowFields)
+            setTimeoutQuery()
+        }).fail(function (e, res) {
+            // console.log('hitsQuery', e, res)
+            printMessage(e)
         })
     })
+
+    setTimeout(function () {
+        Backbone.Events.trigger('execQuery', 1, true)
+    })
+})

@@ -23,7 +23,12 @@ define(["moment"], function (moment) {
         if (!mod) {
             return null
         }
-        if (mod === 'now' || mod === 'rt') {
+
+        if (_.isNumber(mod)) {
+            return moment(mod * 1000).utc().format()
+        }
+
+        if (mod === 'now' || mod === 'rt' || mod === 'rtnow') {
             return moment().utc().format()
         }
 

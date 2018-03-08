@@ -14,7 +14,6 @@ define(["jquery", "underscore",
 
     return Backbone.View.extend({
         "initialize": function (options) {
-            console.log('options', options)
             this.onShowFields = options.onShowFields
             this.bShowFields = true
         },
@@ -42,58 +41,23 @@ define(["jquery", "underscore",
                 Backbone.Events.trigger('execQuery', gotoPage)
             }
         },
-        "render": function (qo, isNew) {
+        "render": function (hits, bShowFieldView) {
             var vm = this
-            if (isNew) {
-                // 신규 검색
-                $.when(QueryExec.hitsQuery(_.clone(qo)),
-                    QueryExec.fieldsQuery(_.clone(qo)),
-                    QueryExec.timelineQuery(_.clone(qo))).done(function (events, fields, timeln) {
-                        console.log('query', events[0])
-                        vm.fieldview = new Fieldview({
-                            "mappings": fields[0],
-                            "el": ".search-results-eventspane-fieldsviewer"
-                        })
-                        var html = vm.compile(events[0], fields[0], timeln[0], qo.from)
-                        vm.$el.html(html)
-                        vm.fieldview.render()
-                        vm.showFields(qo.bShowField)
-                        // 초기 로딩 시 만 
-                        Backbone.Events.trigger('execComplete')
-                    }).fail(function (e) {
-                        Backbone.Events.trigger('execError', e)
-                        vm.$el.html('')
-                    })
-            } else {
-                // 페이징 처리
-                QueryExec.hitsQuery(_.clone(qo)).done(function (res, status, xhr) {
-                    var html = vm.compile(res, null, null, qo.from)
-                    vm.fieldview.cache()
-                    vm.$el.html(html)
-                    vm.fieldview.render()
-                    vm.showFields(qo.bShowField)
-                }).fail(function (e) {
-                    Backbone.Events.trigger('execError', e)
-                    vm.$el.html('')
-                })
+            if (!hits.hits.length) {
+                Backbone.Events.trigger('printMessage', 'No results found. Try expanding the time range.')
+                return
             }
+            vm.$el.html(_.template(eventview, vm.model(hits)))
+            vm.showFields(bShowFieldView)
+            Backbone.Events.trigger('eventViewRendered')
         },
-        "compile": function (events, fields, timeln, from) {
-            var vm = this
-            vm.events = events
-            vm.fields = fields || vm.fields
-            vm.timeln = timeln || vm.timeln
-            return _.template(eventview, vm.model(vm.events.hits, vm.fields, vm.timeln, from))
-        },
-        "model": function (hits, fields, timeln, from) {
+        "model": function (hits) {
             return {
                 "hits": hits,
-                "fields": fields,
-                "timeln": timeln,
                 "pager": {
                     "total": hits.total,
                     "size": hits.hits.length,
-                    "from": from
+                    "from": hits.from
                 },
                 "filter": {
                     "date": function (timestamp, format) {
@@ -117,6 +81,10 @@ define(["jquery", "underscore",
             }
         },
         "showAllFields": function (bShow) {
+
+        },
+        "close": function () {
+            this.$el.html('')
         }
     })
 })

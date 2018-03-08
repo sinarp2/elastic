@@ -7,23 +7,20 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         hitsQuery: hitsQuery,
         fieldsQuery: fieldsQuery,
         timelineQuery: timelineQuery,
-        tokenizeQuery: tokenizeQuery,
-        buildQuery: buildQuery
+        getQueryObject: getQueryObject,
+        applyTimeRange: applyTimeRange,
+        applyPagination: applyPagination
     }
 
     function hitsQuery(params) {
         var q = $.Deferred()
         var p = doGet(params)
-        p.done(function(res, status, xhr) {
+        p.done(function (res, status, xhr) {
             var jo = {}
             try {
                 jo = JSON.parse(res)
                 if (!jo.hits) {
                     q.reject(jo)
-                    return
-                }
-                if (jo.hits.total === 0) {
-                    q.reject('No results found. Try expanding the time range.')
                     return
                 }
             } catch (e) {
@@ -42,7 +39,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
 
         var q = $.Deferred()
         var p = doGet(params)
-        p.done(function(res, status, xhr) {
+        p.done(function (res, status, xhr) {
             var jo = {}
             try {
                 jo = JSON.parse(res)
@@ -70,13 +67,17 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         })
     }
 
-    function tokenizeQuery(text) {
-        var tmpArr = text.trim().split(/\s+/).filter(function (e) { return e.trim().length > 0 })
+    function getQueryObject(text) {
+        // 문장 토크나이징
+        var tmpArr = text.trim().split(/\s+/).filter(function (e) {
+            return e.trim().length > 0
+        })
         var qo = {}
 
         if (tmpArr.length < 2) {
             return null
         }
+
         qo.method = tmpArr[0].toUpperCase()
         qo.uri = tmpArr[1]
         qo.data = '{}'
@@ -95,10 +96,30 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
                 break
             }
         }
+
+        try {
+            qo.json = JSON.parse(qo.data)
+        } catch (e) {
+            qo.json = null
+        }
+
         return qo
     }
 
-    function buildQuery(qo, timerange, page) {
+    function applyPagination(qo, page) {
+        var size = (qo["size"]) ? qo["size"] : 10
+        qo.json.from = (page - 1) * size + 1
+        qo.json.size = size
+        qo.json.sort = {
+            "@timestamp": "asc"
+        }
+        qo.data = JSON.stringify(qo.json)
+        qo.from = qo.json.from
+        qo.size = qo.json.size
+        return qo
+    }
+
+    function applyTimeRange(qo, timerange) {
 
         /**
          * qo.data to json object
@@ -112,32 +133,45 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
          *          All Time으로 설정하면 자체적인 시간 설정이 가능함.
          * set from size
          */
-        console.log('buildQuery -> timerange', timerange)
-
-        var jo = {}
-        try {
-            jo = JSON.parse(qo.data)
-        } catch (e) {
-            throw e
-        }
-        var size = (qo["size"]) ? qo["size"] : 10
-        jo["from"] = (page - 1) * size + 1
-        jo["size"] = size
+        console.log('applyTimeRange -> timerange', timerange)
 
         var range = {
             "range": {
                 "@timestamp": {
                     "gte": timerange.gte,
                     "lte": timerange.lte,
-                    "time_zone": "+09:00"
+                    "time_zone": timerange.timezone
                 }
             }
         }
+
+        if (!timerange.gte) {
+            range['range']['@timestamp'] = _.omit(range['range']['@timestamp'], "gte")
+        }
+
+        if (!timerange.lte) {
+            range['range']['@timestamp'] = _.omit(range['range']['@timestamp'], "lte")
+        }
+
+        var tmpl = {
+            "query": {
+                "bool": {
+                    "must": [],
+                    "should": [],
+                    "must_not": [],
+                    "filter": []
+                },
+                "form": 0,
+                "size": 0
+            }
+        }
+
         /**
          * bool 쿼리로 전환 
          * 
          */
-        console.log('jo', jo)
+        var jo = qo.json
+
         if (!timerange.gte && !timerange.lte) {
             // All time
             // 날짜 설정하지 않음.
@@ -159,6 +193,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
                 if (_.isArray(ro)) {
 
                 }
+                Backbone.Events.trigger('setUserTimerange', _.clone(jo.query.range))
             }
         } else if (!jo.query.bool) {
             // match, match_all, terms ...
@@ -189,8 +224,6 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         }
         qo.data = JSON.stringify(jo)
         qo.json = jo
-        qo.from = jo.from
-        qo.size = jo.size
         return qo
     }
 })
