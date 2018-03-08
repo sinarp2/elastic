@@ -81,7 +81,7 @@ require([
     }
 
     mytimerange.on("change", function (e) {
-        setTimerange()
+        updateTimerange()
         executeQuery(1, true)
     })
 
@@ -216,18 +216,19 @@ require([
                 //cancelTimeout(mytimerange.runtimeId)
             }
             mytimerange.runtimeId = setTimeout(function () {
-                setTimerange()
+                updateTimerange()
                 executeQuery(1, true)
             }, mytimerange.timerange.timeout)
         }
     }
 
-    function setTimerange() {
+    function updateTimerange() {
         var mtr = mytimerange
         var gte = mtr.val().earliest_time
         var lte = mtr.val().latest_time
 
-        mtr.timerange.isRuntime = (gte && gte.indexOf('rt') === 0)
+        mtr.timerange.isRuntime = (gte && !_.isNumber(gte) && gte.indexOf('rt') === 0)
+        
         if (gte === 'rt' && lte === 'rt') {
             // runtime
             mtr.timerange.gte = 0
@@ -237,9 +238,10 @@ require([
             mtr.timerange.gte = 0
             mtr.timerange.lte = ''
         } else {
-            mtr.timerange.gte = modifier.convertToUTC(mtr.val().earliest_time)
-            mtr.timerange.lte = modifier.convertToUTC(mtr.val().latest_time)
+            mtr.timerange.gte = modifier.convertToUTC(gte)
+            mtr.timerange.lte = modifier.convertToUTC(lte)
         }
+
         mtr.timerange.timeout = getTimeout(mtr.timerange.isRuntime, gte)
     }
 
