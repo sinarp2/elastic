@@ -81,6 +81,7 @@ require([
     }
 
     mytimerange.on("change", function (e) {
+        console.log('timerange change', e)
         updateTimerange()
         executeQuery(1, true)
     })
