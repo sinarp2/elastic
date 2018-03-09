@@ -77,7 +77,7 @@ define(["jquery",
         var vm = that
         var aggs = {}
         _.some(vm.properties, function (obj, key) {
-            if (_.size(aggs) === vm.maxFields) {
+            if (_.size(aggs) === (vm.maxFields * 2)) {
                 return true
             }
             aggs[key] = {

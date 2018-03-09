@@ -91,7 +91,7 @@ require([
     var mysearch = new SearchManager({
         id: "example-search",
         preview: true,
-        search: ' | esproxy "http://211.234.125.15:29200/dhcp*/_search" "{ \\"size\\":20, \\"query\\": { \\"match_all\\" : {} } }" ',
+        search: ' | esproxy "http://211.234.125.15:29200/dhcp*/_search" "{ \\"size\\":20, \\"query\\": { \\"match_all\\" : {} } }"',
         status_buckets: 300,
         required_field_list: "*"
     })
@@ -112,16 +112,6 @@ require([
         console.log('mytimeline changed', e, mytimeline.val())
         // mysearch.search.set(mytimeline.val());
     })
-
-    // var listviewer = new EventsViewer({
-    //     id: "example-eventsviewer-list",
-    //     managerid: "example-search",
-    //     type: "raw",
-    //     pagerPosition: "top",
-    //     showPager: true,
-    //     rowNumbers: false,
-    //     el: $(".search-results-eventspane-controls")
-    // }).render()
 
 
     function executeQuery(pageNum, bRestore) {

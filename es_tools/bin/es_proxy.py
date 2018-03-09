@@ -15,10 +15,6 @@ json_headers = {'Content-Type': 'application/json'}
 def main(argv):
     
     try:
-        
-        logger.info(sys.argv)
-        # url = sys.argv[1][1:-1]
-        # query = sys.argv[2][1:-1]
         url = sys.argv[1]
         query = sys.argv[2]
         logger.info('url=' + url)
@@ -29,16 +25,13 @@ def main(argv):
 
         hits = jo['hits']['hits']
 
-        logger.info(hits)
+        logger.info(r.text)
         splunk.Intersplunk.outputResults(hits)
-
         # print hitsValues
         #
-
     except Exception as e:
         logger.error("error")
         logger.error(e)
-
 
 if __name__ == '__main__':
     try:
