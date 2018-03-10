@@ -33,7 +33,10 @@ def main(argv):
             if count == 0:
                 keys = item.keys()
                 logger.info(','.join(keys))
-            logger.info(','.join(item.values()))˝
+            ln = []
+            for obj in item.values():
+                ln.append(obj)
+                logger.info(obj)
             count = count + 1
         # for key, value in d.items():
         #     logger.info(key)

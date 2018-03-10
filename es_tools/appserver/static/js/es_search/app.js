@@ -107,7 +107,7 @@ require([
         id: "example-timeline",
         managerid: "example-search",
         el: $(".timeline-container")
-    }).render()
+    })
 
     mytimeline.on("change", function (e) {
         console.log('mytimeline changed', e, mytimeline.val())
