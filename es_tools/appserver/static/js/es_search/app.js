@@ -21,6 +21,7 @@ require([
     "splunkjs/mvc/timerangeview",
     "splunkjs/mvc/searchmanager",
     "splunkjs/mvc/timelineview",
+    "splunkjs/mvc/chartview",
     'splunkjs/mvc/simplexml/ready!'
 ], function (
     $,
@@ -36,7 +37,8 @@ require([
     es_search,
     TimeRangeView,
     SearchManager,
-    TimelineView
+    TimelineView,
+    ChartView
 ) {
     $('.dashboard-title').prepend('<i class="icon-search-thin"></i> ')
     $('.dashboard-body').css('min-height', 0)
@@ -90,11 +92,8 @@ require([
      * SearchManager
      */
     var mysearch = new SearchManager({
-        id: "example-search",
-        preview: true,
-        search: ' | esproxy "http://211.234.125.15:29200/dhcp*/_search" "{ \\"size\\":20, \\"query\\": { \\"match_all\\" : {} } }"',
-        status_buckets: 300,
-        required_field_list: "*"
+        id: "timeline-search",
+        preview: false
     })
 
     mysearch.on('search:done', function (e) {
@@ -103,17 +102,14 @@ require([
         console.log('job', mysearch.getJobResponse())
     })
 
-    var mytimeline = new TimelineView({
-        id: "example-timeline",
-        managerid: "example-search",
+    barchart = new ChartView({
+        id: "example-chart",
+        managerid: "timeline-search",
+        type: "column",
+        "charting.chart.stackMode": "stacked", // Place complex property names within quotes
+        "charting.legend.placement": "bottom",
         el: $(".timeline-container")
     })
-
-    mytimeline.on("change", function (e) {
-        console.log('mytimeline changed', e, mytimeline.val())
-        // mysearch.search.set(mytimeline.val());
-    })
-
 
     function executeQuery(pageNum, bRestore) {
 
@@ -146,6 +142,42 @@ require([
                     "onShowFields": function (bShow) {
                         bShowFields = bShow
                     }
+                })
+                qdata = '{\
+                    "size": 0,\
+                    "aggs" : {\
+                        "count_by_timestamp" : {\
+                            "date_histogram" : {\
+                                "field" : "@timestamp",\
+                                "interval" : "1d"\
+                            }\
+                        }\
+                    },\
+                    "query": {\
+                    "bool": {\
+                      "filter": [{\
+                        "term": {\
+                          "dhcplog_type": "allocated"\
+                        }},{\
+                        "range" : {\
+                            "@timestamp" : {\
+                                "gte": "now-3M/M", \
+                                "lte": "now", \
+                                "time_zone": "+09:00"\
+                            }\
+                        }}\
+                      ]\
+                    }\
+                  },\
+                  "sort" : [\
+                        { "@timestamp" : {"order" : "asc"}}\
+                    ]\
+                }\
+                | eval _time = strptime(key_as_string,"%Y-%m-%dT%H:%M:%S")\
+                | table _time, doc_count '
+                qdata = qdata.replace(/"/g, '\\"')
+                mysearch.set({
+                    search: ' | esproxy "http://211.234.125.15:29200/dhcp*/_search" "' + qdata + '"'
                 })
             })
         } else {
@@ -292,6 +324,8 @@ require([
             "aggs": aggs
         })
         qo.data = JSON.stringify(qo.json)
+        // barchart.render()
+        console.log('timeline render')
         QueryExec.hitsQuery(qo).done(function (res) {
             res.hits.from = qo.from
             fieldview.aggs = res.aggregations

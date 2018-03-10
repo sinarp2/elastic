@@ -24,23 +24,24 @@ def main(argv):
         r = requests.get(
             url=url, headers=json_headers, data=query, timeout=15 * 60)
         
-        d = r.json(object_pairs_hook=OrderedDict)
+        # d = r.json(object_pairs_hook=OrderedDict)
+        j = r.json()
 
-        hits = d['hits']['hits']
+        buckets = j['aggregations']['count_by_timestamp']['buckets']
 
-        count = 0
-        for item in hits:
-            if count == 0:
-                keys = item.keys()
-                logger.info(','.join(keys))
-            ln = []
-            for obj in item.values():
-                ln.append(obj)
-                logger.info(obj)
-            count = count + 1
+        logger.info(buckets)
+        splunk.Intersplunk.outputResults(buckets)
+        # count = 0
+        # for item in buckets:
+        #     if count == 0:
+        #         splunk.Intersplunk.outputResults(','.join(str(x) for x in item.keys()))
+        #     splunk.Intersplunk.outputResults(','.join(str(x) for x in item.values()))
+        #     count = count + 1
+
+        # logger.info(csvlist)
         # for key, value in d.items():
         #     logger.info(key)
-        # splunk.Intersplunk.outputResults(hits)
+        # splunk.Intersplunk.outputResults(csvlist)
         # print hitsValues
         #
     except Exception as e:
