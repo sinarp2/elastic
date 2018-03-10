@@ -1,6 +1,7 @@
 import sys
 import json, csv
 import requests
+from collections import OrderedDict
 import splunk.Intersplunk
 import splunk.mining.dcutils as dcu
 
@@ -19,14 +20,24 @@ def main(argv):
         query = sys.argv[2]
         logger.info('url=' + url)
         logger.info('query=' + query)
+        
         r = requests.get(
             url=url, headers=json_headers, data=query, timeout=15 * 60)
-        jo = r.json()
+        
+        d = r.json(object_pairs_hook=OrderedDict)
 
-        hits = jo['hits']['hits']
+        hits = d['hits']['hits']
 
-        logger.info(r.text)
-        splunk.Intersplunk.outputResults(hits)
+        count = 0
+        for item in hits:
+            if count == 0:
+                keys = item.keys()
+                logger.info(','.join(keys))
+            logger.info(','.join(item.values()))
+            count = count + 1
+        # for key, value in d.items():
+        #     logger.info(key)
+        # splunk.Intersplunk.outputResults(hits)
         # print hitsValues
         #
     except Exception as e:

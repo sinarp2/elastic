@@ -1,5 +1,5 @@
-
 import re
+import collections
 
 jsonString = """{
     "took": -0.68,
@@ -41,32 +41,37 @@ jsonString = """{
     }
 }"""
 
-
 class ValueType:
-    value = None
-    group = None
-    patterns = [r'([.+\-\d]+)\s*,', r'(false|true|null)\s*,', r'(\S+),']
+    _pattern = [r'([.+\-\d]+)\s*,', r'(false|true|null)\s*,', r'(\S+),']
 
     def __init__(self, jstr):
-        self.jstr = jstr
+        self._jstr = jstr
+        self._value = None
+        self._group = None
+        self._valueType = None
+        self._parse()
 
-    def parse(self):
-        for pattern in self.patterns:
-            m = re.match(pattern, self.jstr, re.M)
+    def _parse(self):
+        for pattern in self._pattern:
+            m = re.match(pattern, self._jstr, re.M)
             if m is not None:
-                self.group = m.group()
-                self.value = m.group(1)
+                self._group = m.group()
+                self._value = m.group(1)
+                self._valueType = 'flat'
                 return
 
-        if self.jstr[:1] is '{':
-            self.value = self.get_object_str('{', '}')
-            self.group = self.value
+        if self._jstr[:1] is '{':
+            (lst, lst_group) = self.get_object_str('{', '}')
+            self._value = ''.join(lst)
+            self._group = ''.join(lst + lst_group)
+            self._valueType = 'dict'
             return
 
-        if self.jstr[:1] is '[':
+        if self._jstr[:1] is '[':
             (lst, lst_group) = self.get_object_str('[', ']')
-            self.value = ''.join(lst)
-            self.group = ''.join(lst + lst_group)
+            self._value = ''.join(lst)
+            self._group = ''.join(lst + lst_group)
+            self._valueType = 'array'
             return
 
     def get_object_str(self, delim1, delim2):
@@ -74,7 +79,7 @@ class ValueType:
         lst = []
         lst_group = []
         found = False
-        for ch in self.jstr:
+        for ch in self._jstr:
             if found == False:
                 lst.append(ch)
             else:
@@ -91,30 +96,30 @@ class ValueType:
         return (lst, lst_group)
 
     def get_value(self):
-        return self.value
+        return self._value
 
     def get_group(self):
-        return self.group
+        return self._group
 
+    def get_type(self):
+        return self._valueType
 
-class ObjectType:
-    lst = []
-
-    def __init__(self, jstr):
-        self.jstr = jstr
+class BaseType(object):
 
     def update_template(self, jstr):
-        self.jstr = self.jstr[len(jstr):]
-        self.jstr = self.jstr.lstrip(' \t\n\r')
-        print '========='
-        print jstr
-        print '>>>>>>'
-        print self.jstr
+        self._jstr = self._jstr[len(jstr):]
+        self._jstr = self._jstr.lstrip(' \t\n\r')
 
-    def parse(self):
-        m = re.match(r'^{[\n|\r|\s]+([\s\S]+)}$', self.jstr, re.M)
+class ObjectType(BaseType):
+    def __init__(self, jstr):
+        self._dict = collections.OrderedDict()
+        self._jstr = jstr
+        self._parse()
+
+    def _parse(self):
+        m = re.match(r'^{[\n|\r|\s]+([\s\S]+)}$', self._jstr, re.M)
         if m is not None:
-            self.jstr = m.group(1)
+            self._jstr = m.group(1)
         self.traverse()
 
     def traverse(self):
@@ -122,26 +127,87 @@ class ObjectType:
         if key is None:
             return
         val = self.get_value()
-        self.lst.append({key: val})
+        self._dict[key] = val
         self.traverse()
 
     def get_name(self):
-        m = re.match(r'"(\w+)"[\n|\r|\s]*:[\n|\r|\s]*', self.jstr, re.M)
+        m = re.match(r'"(\w+)"[\n|\r|\s]*:[\n|\r|\s]*', self._jstr, re.M)
         if m is not None:
-            self.update_template(m.group())
+            BaseType.update_template(self, m.group())
             return m.group(1)
         else:
             return None
 
     def get_value(self):
-        o = ValueType(self.jstr)
-        o.parse()
+        o = ValueType(self._jstr)
         val = o.get_value()
         group = o.get_group()
+        valType = o.get_type()
         if group is not None:
-            self.update_template(group)
+            BaseType.update_template(self, group)
+
+        if valType == 'dict':
+            o = ObjectType(val)
+            val = o.get_dict()
+        if valType == 'array':
+            a = ArrayType(val)
+            val = a.get_list()
+
         return val
+
+    def get_dict(self):
+        return self._dict
+
+
+class ArrayType(BaseType):
+
+    def __init__(self, jstr):
+        BaseType.__init__(self)
+        self._jstr = jstr.strip(' \t\n\r')
+        self._list = []
+        self._parse()
+
+    def _parse(self):
+        m = re.match(r'^[[\n|\r|\s]+([\s\S]+)]$', self._jstr, re.M)
+        if m is not None:
+            self._jstr = m.group(1)
+        self.traverse()
+
+    def traverse(self):
+        val = self.get_value()
+        if val is None:
+            return
+        self._list.append(val)
+        self.traverse()
+
+    def get_value(self):
+        o = ValueType(self._jstr)
+        if o is None:
+            return None
+        val = o.get_value()
+        group = o.get_group()
+        valType = o.get_type()
+        if group is not None:
+            BaseType.update_template(self, group)
+
+        if valType == 'dict':
+            o = ObjectType(val)
+            val = o.get_dict()
+        if valType == 'array':
+            a = ArrayType(self._jstr)
+            val = a.get_list()
+
+        return val
+
+    def get_list(self):
+        return self._list
 
 
 x = ObjectType(jsonString)
-x.parse()
+dic = x.get_dict()
+
+
+od = dic['hits']['hits']
+
+for item in od:
+    print item
