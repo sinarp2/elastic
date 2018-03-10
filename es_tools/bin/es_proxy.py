@@ -24,26 +24,12 @@ def main(argv):
         r = requests.get(
             url=url, headers=json_headers, data=query, timeout=15 * 60)
         
-        # d = r.json(object_pairs_hook=OrderedDict)
         j = r.json()
 
         buckets = j['aggregations']['count_by_timestamp']['buckets']
 
-        logger.info(buckets)
         splunk.Intersplunk.outputResults(buckets)
-        # count = 0
-        # for item in buckets:
-        #     if count == 0:
-        #         splunk.Intersplunk.outputResults(','.join(str(x) for x in item.keys()))
-        #     splunk.Intersplunk.outputResults(','.join(str(x) for x in item.values()))
-        #     count = count + 1
-
-        # logger.info(csvlist)
-        # for key, value in d.items():
-        #     logger.info(key)
-        # splunk.Intersplunk.outputResults(csvlist)
-        # print hitsValues
-        #
+        
     except Exception as e:
         logger.error("error")
         logger.error(e)

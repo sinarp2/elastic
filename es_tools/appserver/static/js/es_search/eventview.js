@@ -70,12 +70,12 @@ define(["jquery", "underscore",
         "showFields": function (bShow) {
             if (bShow) {
                 $('.search-results-eventspane-fieldsviewer').css('margin-left', '0')
-                $('.lazy-view-container').css('margin-left', '240px')
+                $('.shared-eventsviewer-lazyeventsviewer').css('margin-left', '240px')
                 $('.shared-controls-syntheticselectcontrol').css('margin-left', '0')
                 $('.search-results-eventspane-controls-showfield').css('display', 'none')
             } else {
                 $('.search-results-eventspane-fieldsviewer').css('margin-left', '-240px')
-                $('.lazy-view-container').css('margin-left', '0')
+                $('.shared-eventsviewer-lazyeventsviewer').css('margin-left', '0')
                 $('.shared-controls-syntheticselectcontrol').css('margin-left', '0')
                 $('.search-results-eventspane-controls-showfield').css('display', 'block')
             }

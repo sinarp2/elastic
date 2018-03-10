@@ -110,9 +110,11 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         var size = (qo["size"]) ? qo["size"] : 10
         qo.json.from = (page - 1) * size + 1
         qo.json.size = size
-        qo.json.sort = {
-            "@timestamp": "asc"
-        }
+        qo.json.sort = [{
+            "@timestamp": {
+                "order": "asc"
+            }
+        }]
         qo.data = JSON.stringify(qo.json)
         qo.from = qo.json.from
         qo.size = qo.json.size
@@ -166,6 +168,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
             }
         }
 
+        console.log('query template')
         /**
          * bool 쿼리로 전환 
          * 
@@ -185,6 +188,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
             // 원 검색문 그대로 리턴
             console.log('buildQuery -> query_string query', jo)
         } else if (jo.query.range) {
+            console.log('user range')
             if (!jo.query.range["@timestamp"]) {
                 // range @timestamp 쿼리
                 // Timerange 기능 disable
@@ -193,7 +197,8 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
                 if (_.isArray(ro)) {
 
                 }
-                Backbone.Events.trigger('setUserTimerange', _.clone(jo.query.range))
+                console.log('trigger setUserTimerange', _.extend({}, jo.query.range))
+                Backbone.Events.trigger('setUserTimerange', _.extend({}, jo.query.range))
             }
         } else if (!jo.query.bool) {
             // match, match_all, terms ...
@@ -210,7 +215,10 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
             var fo = jo.query.bool.filter
             if (_.isArray(fo)) {
                 var hasRange = _.find(fo, function (o) {
-                    return (o.range && o.range["@timestamp"])
+                    if (o.range && o.range["@timestamp"]) {
+                        Backbone.Events.trigger('setUserTimerange', _.extend({}, o.range["@timestamp"]))
+                        return true
+                    }
                 })
                 if (!hasRange) {
                     fo.push(range)
