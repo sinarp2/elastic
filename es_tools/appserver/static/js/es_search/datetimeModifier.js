@@ -1,11 +1,4 @@
 define(["moment"], function (moment) {
-    "use strict";
-
-    function DatetimeModifier() {
-        if (!(this instanceof DatetimeModifier)) {
-            throw new TypeError("DatetimeModifier constructor cannot be called as a function.");
-        }
-    }
 
     var roundPattern = {
         "@y": "YYYY-01-01T00:00:00+00:00",
@@ -19,7 +12,11 @@ define(["moment"], function (moment) {
         "none": "YYYY-MM-DDThh:mm:ss+00:00"
     }
 
-    DatetimeModifier.prototype.convertToUTC = function (mod) {
+    return {
+        convertToUTC: convertToUTC
+    }
+
+    function convertToUTC(mod) {
         if (!mod) {
             return null
         }
@@ -74,6 +71,4 @@ define(["moment"], function (moment) {
 
         return null
     }
-
-    return DatetimeModifier
 })

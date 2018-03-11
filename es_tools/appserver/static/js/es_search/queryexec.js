@@ -197,8 +197,8 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
                 if (_.isArray(ro)) {
 
                 }
-                console.log('trigger setUserTimerange', _.extend({}, jo.query.range))
-                Backbone.Events.trigger('setUserTimerange', _.extend({}, jo.query.range))
+                // console.log('trigger setUserTimerange', _.extend({}, jo.query.range))
+                Backbone.Events.trigger('timerange:update', _.extend({}, jo.query.range))
             }
         } else if (!jo.query.bool) {
             // match, match_all, terms ...
@@ -216,7 +216,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
             if (_.isArray(fo)) {
                 var hasRange = _.find(fo, function (o) {
                     if (o.range && o.range["@timestamp"]) {
-                        Backbone.Events.trigger('setUserTimerange', _.extend({}, o.range["@timestamp"]))
+                        Backbone.Events.trigger('timerange:update', _.extend({}, o.range["@timestamp"]))
                         return true
                     }
                 })

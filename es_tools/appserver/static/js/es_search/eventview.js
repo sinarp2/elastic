@@ -38,18 +38,18 @@ define(["jquery", "underscore",
                 if (gotoPage === currPage) {
                     return
                 }
-                Backbone.Events.trigger('execQuery', gotoPage)
+                Backbone.Events.trigger('query:page', gotoPage)
             }
         },
         "render": function (hits, bShowFieldView) {
             var vm = this
             if (!hits.hits.length) {
-                Backbone.Events.trigger('printMessage', 'No results found. Try expanding the time range.')
+                Backbone.Events.trigger('eventview:empty', 'No results found. Try expanding the time range.')
                 return
             }
             vm.$el.html(_.template(eventview, vm.model(hits)))
             vm.showFields(bShowFieldView)
-            Backbone.Events.trigger('eventViewRendered')
+            Backbone.Events.trigger('eventview:rendered')
         },
         "model": function (hits) {
             return {

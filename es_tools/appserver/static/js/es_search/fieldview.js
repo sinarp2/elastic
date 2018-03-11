@@ -31,7 +31,6 @@ define(["jquery",
         },
         "render": function () {
             var vm = this
-            console.log('fieldview render', vm.aggs, vm.fields, vm.properties)
             vm.html = _.template(fieldview, {
                 "fields": vm.fields,
                 "aggs": vm.aggs,
@@ -39,7 +38,6 @@ define(["jquery",
                 "maxFields": vm.maxFields,
                 "totalSize": _.size(vm.properties)
             })
-            console.log('render', vm.el)
             $(vm.el).html(vm.html)
         },
         "dataType": function (type) {
@@ -96,7 +94,7 @@ define(["jquery",
             }
             vm.fields[key] = obj
         })
-        Backbone.Events.trigger('aggsReady', aggs)
+        Backbone.Events.trigger('fieldview:ready', aggs)
     }
 
     return feildView

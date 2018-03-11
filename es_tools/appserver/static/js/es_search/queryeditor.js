@@ -34,7 +34,7 @@ define([
                 mode: "ace/mode/text"
             })
 
-            Backbone.Events.on('execQuery', function () {
+            Backbone.Events.on('query:page query:start', function () {
                 editor.blur()
             })
 
@@ -107,7 +107,7 @@ define([
     }
 
     function onEnterEditor(editor) {
-        Backbone.Events.trigger('execQuery', 1, true)
+        Backbone.Events.trigger('query:start')
     }
 
     return view
