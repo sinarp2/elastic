@@ -1,4 +1,4 @@
-define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone, moment) {
+define(["jquery", "underscore", "backbone"], function ($, _, Backbone) {
 
     var ESAPI_URL = "/custom/Clay/estools/esapi"
 
@@ -7,7 +7,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         hitsQuery: hitsQuery,
         fieldsQuery: fieldsQuery,
         timelineQuery: timelineQuery,
-        getQueryObject: getQueryObject,
+        createQuery: createQuery,
         applyTimeRange: applyTimeRange,
         applyPagination: applyPagination
     }
@@ -54,7 +54,6 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
     }
 
     function timelineQuery(params) {
-
         // Timerange 적용 여부
         // query_string, simple_query_string, range 쿼리는 Timerange 값을 사용하지 않는다.
         // 때문에 timerange 값으로 aggregation 할 수 없음.
@@ -63,11 +62,15 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
 
     function doGet(params) {
         return $.ajax(ESAPI_URL, {
-            data: params
+            data: {
+                method: params.method,
+                uri: params.uri,
+                data: params.data
+            }
         })
     }
 
-    function getQueryObject(text) {
+    function createQuery(text) {
         // 문장 토크나이징
         var tmpArr = text.trim().split(/\s+/).filter(function (e) {
             return e.trim().length > 0
@@ -112,7 +115,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         qo.json.size = size
         qo.json.sort = [{
             "@timestamp": {
-                "order": "asc"
+                "order": "desc"
             }
         }]
         qo.data = JSON.stringify(qo.json)
@@ -140,19 +143,21 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
         var range = {
             "range": {
                 "@timestamp": {
-                    "gte": timerange.gte,
-                    "lte": timerange.lte,
                     "time_zone": timerange.timezone
                 }
             }
         }
 
-        if (!timerange.gte) {
-            range['range']['@timestamp'] = _.omit(range['range']['@timestamp'], "gte")
+        if (timerange.gte) {
+            range['range']['@timestamp']["gte"] = timerange.gte
         }
 
-        if (!timerange.lte) {
-            range['range']['@timestamp'] = _.omit(range['range']['@timestamp'], "lte")
+        if (timerange.lte) {
+            if (timerange.latest_time.indexOf('@') > -1) {
+                range['range']['@timestamp']["lt"] = timerange.lte
+            } else {
+                range['range']['@timestamp']["lte"] = timerange.lte
+            }
         }
 
         var tmpl = {
@@ -167,8 +172,7 @@ define(["jquery", "underscore", "backbone", "moment"], function ($, _, Backbone,
                 "size": 0
             }
         }
-
-        console.log('query template')
+        
         /**
          * bool 쿼리로 전환 
          * 

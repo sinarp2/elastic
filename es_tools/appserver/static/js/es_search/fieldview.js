@@ -1,5 +1,6 @@
 require.config({
     paths: {
+        es: "../app/Clay/js/es_search",
         text: "../app/Clay/lib/text"
     }
 })
@@ -7,8 +8,9 @@ require.config({
 define(["jquery",
     "underscore",
     "backbone",
+    "es/fieldinfo",
     "text!../app/Clay/html/es_fieldview.html"
-], function ($, _, Backbone, fieldview) {
+], function ($, _, Backbone, FieldInfo, fieldview) {
 
     var fieldTypes = {
         "string,text,keyword": "a",
@@ -39,6 +41,7 @@ define(["jquery",
                 "totalSize": _.size(vm.properties)
             })
             $(vm.el).html(vm.html)
+            $('.fields-info').on('click', this.showFieldInfo)
         },
         "dataType": function (type) {
             var ch = '?'
@@ -52,6 +55,9 @@ define(["jquery",
         },
         "close": function () {
             this.$el.html('')
+        },
+        "showFieldInfo": function (e) {
+            console.log('show fieldinfo', $(e.target).data('field-name'), this.aggs)
         }
     })
 

@@ -6,28 +6,28 @@ require.config({
 })
 
 define(["jquery",
+    "underscore",
     "backbone",
-    "moment",
     "es/eventview",
     "es/fieldview",
     "es/modalview",
     "es/queryeditor",
     "es/queryexec",
-    "es/datetimeModifier",
+    "es/utils",
     "ace/ace",
     "text!../app/Clay/html/es_search.html",
     "splunkjs/mvc/timerangeview",
     "splunkjs/mvc/searchmanager",
     "splunkjs/mvc/chartview"
 ], function ($,
+    _,
     Backbone,
-    moment,
     EventView,
     FieldView,
     ModalView,
     QueryEditor,
     queryExec,
-    datemod,
+    utils,
     ace,
     es_search,
     TimeRangeView,
@@ -37,7 +37,6 @@ define(["jquery",
         return Backbone.View.extend({
 
             bShowFields: true,
-            queryObject: {},
 
             qeditor: null,
             eventview: null,
@@ -56,8 +55,6 @@ define(["jquery",
                 Backbone.Events.on('all', function (e) {
                     if (vm.events[e]) {
                         vm.events[e].apply(vm, Array.prototype.slice.call(arguments, 1));
-                    } else {
-                        console.log('event', e)
                     }
                 })
             },
@@ -69,7 +66,7 @@ define(["jquery",
                     this.executeQuery(page_number)
                 },
                 "eventview:rendered": function () {
-                    fieldview.render()
+                    this.fieldview.render()
                     this.printMessage('')
                 },
                 "fieldview:ready": function (aggregations_objects) {
@@ -105,9 +102,11 @@ define(["jquery",
 
                 vm.trview.timerange = {
                     runtime: false,
-                    gte: moment().utc().format('YYYY-MM-DDT00:00:00.000+00:00'),
-                    lte: moment().utc().format('YYYY-MM-DDThh:mm:ss.000+00:00'),
-                    timezone: "+09:00"
+                    gte: utils.now('YYYY-MM-DDT00:00:00.000+00:00'),
+                    lte: utils.now('YYYY-MM-DDThh:mm:ss.000+00:00'),
+                    timezone: "+09:00",
+                    earliest_time: "@d",
+                    latest_time: "now"
                 }
 
                 vm.trview.runtimeMod = {
@@ -117,7 +116,7 @@ define(["jquery",
                 }
 
                 vm.trview.on("change", function (e) {
-                    console.log('timerange change', e)
+                    console.log('timerange change', e, vm.trview)
                     vm.updateTimerange()
                     vm.executeQuery(1, true)
                 })
@@ -161,15 +160,34 @@ define(["jquery",
 
                 vm.timechart.on('selection', function (e) {
                     if (e.data && e.data.start) {
-                        var start_time = moment(e.data.start * 1000).format()
-                        var end_time = moment(e.data.end * 1000).format()
-                        console.log('timechart selection', e, start_time, end_time, vm.trview.timerange)
+                        var start_time = utils.unix(e.data.start)
+                        var end_time = utils.unix(e.data.end)
+                        var qo = $.extend(true, {}, vm.tlsearch.qo)
+                        if (!e.isReset) {
+                            // 시간 간격 업데이트
+                        }
+                        //fetchEvents(qo)
                     }
                 })
 
                 vm.timechart.on('clicked:chart', function (e) {
                     e.preventDefault()
                     console.log('timechart click', e, e.value)
+                })
+            },
+            "fetchEvents": function (qo) {
+                var vm = this
+                queryExec.hitsQuery(qo).done(function (res) {
+                    res.hits.from = qo.from
+                    if (res.aggregations) {
+                        vm.fieldview.aggs = res.aggregations
+                    }
+                    vm.timechart.$el.show()
+                    vm.eventview.render(res.hits, vm.bShowFields)
+                    vm.setTimeoutQuery()
+                }).fail(function (e, res) {
+                    // console.log('hitsQuery', e, res)
+                    vm.printMessage(e)
                 })
             },
             "executeQuery": function (pageNum, bRestore) {
@@ -192,15 +210,14 @@ define(["jquery",
                 }
 
                 if (bRestore) {
-                    var qo = $.extend(true, {}, queryObject);
+                    var qo = $.extend(true, {}, vm.tlsearch.qo);
                     queryExec.fieldsQuery(qo).done(function (res) {
-                        console.log('field query completed.')
-                        fieldview = new FieldView({
+                        vm.fieldview = new FieldView({
                             "mappings": res,
                             "el": ".search-results-eventspane-fieldsviewer",
                             "maxFields": 12
                         })
-                        eventview = new EventView({
+                        vm.eventview = new EventView({
                             "el": $('.search-results-eventspane-controls'),
                             "onShowFields": function (bShow) {
                                 vm.bShowFields = bShow
@@ -208,42 +225,30 @@ define(["jquery",
                         })
                     })
                 } else {
-                    var qo = $.extend(true, {}, queryObject);
-                    queryExec.hitsQuery(qo).done(function (res) {
-                        res.hits.from = qo.from
-                        eventview.render(res.hits, vm.bShowFields)
-                        fieldview.render()
-                    })
+                    var qo = $.extend(true, {}, vm.tlsearch.qo);
+                    vm.fetchEvents(qo)
                 }
             },
             "startSearch": function (aggregations_objects) {
                 var vm = this
-                var qo = $.extend(true, {}, queryObject);
+                var qo = $.extend(true, {}, vm.tlsearch.qo);
                 qo.json = _.extend(qo.json, {
                     "aggs": aggregations_objects
                 })
                 qo.data = JSON.stringify(qo.json)
-                queryExec.hitsQuery(qo).done(function (res) {
-                    res.hits.from = qo.from
-                    fieldview.aggs = res.aggregations
-                    vm.timechart.$el.show()
-                    eventview.render(res.hits, vm.bShowFields)
-                    vm.setTimeoutQuery()
-                }).fail(function (e, res) {
-                    // console.log('hitsQuery', e, res)
-                    vm.printMessage(e)
-                })
-                qdata = JSON.stringify(queryObject.tlq)
+
+                var qdata = JSON.stringify(qo.tlq)
                 qdata = qdata.replace(/"/g, '\\"')
                 eshost = this._esHost
-                console.log('queryObject', queryObject)
-                eshost = eshost + '/' + queryObject.index + '/_search'
+                eshost = eshost + '/' + qo.index + '/_search'
                 vm.tlsearch.set({
                     search: ' | estimeline "' + eshost + '" "' + qdata + '" \
                     | eval _time = strptime(key_as_string,"%Y-%m-%dT%H:%M:%S")\
                     | rename doc_count as count \
                     | table _time, count'
                 })
+
+                vm.fetchEvents(qo)
                 vm.tlsearch.startSearch()
             },
             "updateEventCount": function (count) {
@@ -260,6 +265,9 @@ define(["jquery",
                 var html = ''
                 var $msg = $('.message-single.search-results-shared-jobdispatchstatemessage')
                 if (message) {
+                    if (_.isObject(message)) {
+                        message = JSON.stringify(message)
+                    }
                     if (type === 'info') {
                         html = '<div class="alert alert-info"><i class="icon-alert"></i>' + message + '</div>'
                     } else {
@@ -279,7 +287,7 @@ define(["jquery",
                         console.log('timerange.timeout=', m, gte)
                     } else {
                         var num = parseInt(m[1], 10)
-                        return num * trview.runtimeMod[m[2]]
+                        return num * vm.trview.runtimeMod[m[2]]
                     }
                 }
                 return 0
@@ -300,6 +308,8 @@ define(["jquery",
                 var gte = mtr.val().earliest_time
                 var lte = mtr.val().latest_time
 
+                mtr.timerange.earliest_time = gte
+                mtr.timerange.latest_time = lte
                 mtr.timerange.isRuntime = (gte && !_.isNumber(gte) && gte.indexOf('rt') === 0)
 
                 if (gte === 'rt' && lte === 'rt') {
@@ -311,40 +321,40 @@ define(["jquery",
                     mtr.timerange.gte = 0
                     mtr.timerange.lte = ''
                 } else {
-                    mtr.timerange.gte = datemod.convertToUTC(gte)
-                    mtr.timerange.lte = datemod.convertToUTC(lte)
+                    mtr.timerange.gte = utils.spModify(gte)
+                    mtr.timerange.lte = utils.spModify(lte)
                 }
 
                 mtr.timerange.timeout = this.getTimeout(mtr.timerange.isRuntime, gte)
             },
             "makeQueryObject": function (pageNum, bRestore) {
                 if (!bRestore) {
-                    queryObject = queryExec.applyPagination(queryObject, pageNum)
+                    this.tlsearch.qo = queryExec.applyPagination(this.tlsearch.qo, pageNum)
                     return true
                 }
 
-                queryObject = queryExec.getQueryObject(this.qeditor.getValue())
+                var qo = queryExec.createQuery(this.qeditor.getValue())
 
-                if (!queryObject) {
+                if (!qo) {
                     return false
                 }
-                if (queryObject.method !== 'GET') {
+                if (qo.method !== 'GET') {
                     showMessage('잘 못된 쿼리문장', '검색문장은 GET으로 시작하여야 합니다.')
                     return false
                 }
-                if (queryObject.uri.indexOf('_search') < 0) {
+                if (qo.uri.indexOf('_search') < 0) {
                     showMessage('잘 못된 쿼리문장', '_search 키워드를 사용해 주세요.')
                     return false
                 }
-                if (!queryObject.json) {
+                if (!qo.json) {
                     showMessage('잘 못된 쿼리문장', '문장을 확인해 주세요.')
                     return false
                 }
 
-                queryObject.size = 10
-                queryObject.bShowField = this.bShowFields
-                queryObject = queryExec.applyTimeRange(queryObject, this.trview.timerange)
-                queryObject = queryExec.applyPagination(queryObject, pageNum)
+                qo.size = 10
+                qo.bShowField = this.bShowFields
+                qo = queryExec.applyTimeRange(qo, this.trview.timerange)
+                qo = queryExec.applyPagination(qo, pageNum)
 
                 tlq = {
                     "size": 0,
@@ -352,7 +362,7 @@ define(["jquery",
                         "count_by_timestamp": {
                             "date_histogram": {
                                 "field": "@timestamp",
-                                "interval": "1d"
+                                "interval": utils.timelineInterval(qo.json)
                             }
                         }
                     },
@@ -363,9 +373,11 @@ define(["jquery",
                         }
                     }]
                 }
-                $.extend(true, tlq.query, queryObject.json.query)
+                $.extend(true, tlq.query, qo.json.query)
                 // $.extend(true, tlq.sort, queryObject.json.sort)
-                queryObject.tlq = tlq
+                qo.tlq = tlq
+
+                this.tlsearch.qo = qo
 
                 return true
             }
