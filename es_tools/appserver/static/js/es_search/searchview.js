@@ -115,30 +115,12 @@ define(["jquery",
                     "h": 3600000
                 }
 
-                vm.trview.on("change", function (e) {
-                    console.log('timerange change', e, vm.trview)
-                    vm.updateTimerange()
-                    vm.executeQuery(1, true)
-                })
-
                 vm.tlsearch = new SearchManager({
                     id: "timeline-search",
                     preview: true,
                     status_buckets: 300,
                     autostart: true,
                     cache: false
-                })
-
-                vm.tlsearch.on('search:done', function (e) {
-                    if (e.content.resultCount > 0) {
-                        vm.timechart.$el.show()
-                    } else {
-                        vm.timechart.$el.hide()
-                    }
-                })
-
-                vm.tlsearch.on('search:start', function (e) {
-                    // timechart.$el.show()
                 })
 
                 vm.timechart = new ChartView({
@@ -157,6 +139,24 @@ define(["jquery",
                     "refresh.auto.interval": "5",
                     el: $(".timechart-content")
                 }).render()
+
+                vm.trview.on("change", function (e) {
+                    console.log('timerange change', e, vm.trview)
+                    vm.updateTimerange()
+                    vm.executeQuery(1, true)
+                })
+
+                vm.tlsearch.on('search:done', function (e) {
+                    if (e.content.resultCount > 0) {
+                        vm.timechart.$el.show()
+                    } else {
+                        vm.timechart.$el.hide()
+                    }
+                })
+
+                vm.tlsearch.on('search:start', function (e) {
+                    // timechart.$el.show()
+                })
 
                 vm.timechart.on('selection', function (e) {
                     if (e.data && e.data.start) {
@@ -287,7 +287,7 @@ define(["jquery",
                         console.log('timerange.timeout=', m, gte)
                     } else {
                         var num = parseInt(m[1], 10)
-                        return num * vm.trview.runtimeMod[m[2]]
+                        return num * this.trview.runtimeMod[m[2]]
                     }
                 }
                 return 0
