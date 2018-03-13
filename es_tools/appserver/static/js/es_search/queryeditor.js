@@ -12,8 +12,7 @@ define([
     "es_config",
     "es/utils",
     "text!../app/Clay/html/es_queryeditor.html",
-    "splunkjs/mvc/timerangeview",
-    "splunkjs/mvc/simplexml/ready!"
+    "splunkjs/mvc/timerangeview"
 ], function (
     $,
     _,
@@ -107,18 +106,23 @@ define([
 
             this.trview.timerange = {
                 runtime: false,
-                gte: utils.now_utc_epoch(),
-                lte: utils.now_utc_epoch(),
+                gte: utils.sp_modify("@d"),
+                lte: utils.sp_modify("now"),
                 timezone: utils.get_timezone(),
                 earliest_time: "@d",
                 latest_time: "now"
             }
 
-            this.trview.runtimeMod = {
-                "s": 1000,
-                "m": 60000,
-                "h": 3600000
-            }
+            // this.trview.runtimeMod = {
+            //     "s": 1000,
+            //     "m": 60000,
+            //     "h": 3600000
+            // }
+
+            this.trview.on("change", function(e) {
+                // 재검색 들어감.
+                console.log('timechage', e)
+            });
         },
         "getValue": function () {
             return this.editor.getValue()

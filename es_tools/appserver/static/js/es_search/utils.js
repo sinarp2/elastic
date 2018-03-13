@@ -9,21 +9,19 @@ define([
 ) {
 
     var roundPattern = {
-        "@y": "YYYY-01-01T00:00:00.000+09:00",
-        "@mon": "YYYY-MM-01T00:00:00.000+09:00",
-        "@d": "YYYY-MM-DDT00:00:00.000+09:00",
-        "@h": "YYYY-MM-DDThh:00:00.000+09:00",
-        "@m": "YYYY-MM-DDThh:mm:00.000+09:00",
-        "@s": "YYYY-MM-DDThh:mm:ss.000+09:00",
-        "@w0": "YYYY-MM-DDT00:00:00.000+09:00",
-        "@w1": "YYYY-MM-DDT00:00:00.000+09:00",
-        "none": "YYYY-MM-DDThh:mm:ss.000+09:00"
+        "@y": "YYYY-01-01T00:00:00.000+00:00",
+        "@mon": "YYYY-MM-01T00:00:00.000+00:00",
+        "@d": "YYYY-MM-DDT00:00:00.000+00:00",
+        "@h": "YYYY-MM-DDThh:00:00.000+00:00",
+        "@m": "YYYY-MM-DDThh:mm:00.000+00:00",
+        "@s": "YYYY-MM-DDThh:mm:ss.000+00:00",
+        "@w0": "YYYY-MM-DDT00:00:00.000+00:00",
+        "@w1": "YYYY-MM-DDT00:00:00.000+00:00",
+        "none": "YYYY-MM-DDThh:mm:ss.000+00:00"
     }
 
     return {
-        spModify: spModify,
-        esModify: esModify,
-        unix: unix,
+        sp_modify: sp_modify,
         now_utc_epoch: now_utc_epoch,
         get_timezone: get_timezone,
         timelineInterval: timelineInterval
@@ -53,15 +51,11 @@ define([
         return '1d'
     }
 
-    function unix(num) {
-        return moment(num * 1000).format()
-    }
-
     function now_utc_epoch(millis) {
         if (millis) {
             return moment().valueOf()
         } else {
-            return moment().utc()
+            return moment().unix()
         }
     }
 
@@ -69,15 +63,15 @@ define([
         return moment(input)
     }
 
-    function spModify(mod) {
+    function sp_modify(mod) {
         if (!mod) {
             return null
         }
         if (_.isNumber(mod)) {
-            return moment(mod * 1000).format()
+            return mod
         }
         if (mod === 'now' || mod === 'rt' || mod === 'rtnow') {
-            return moment().format()
+            return moment().unix()
         }
         if (mod.indexOf('rt') === 0) {
             mod = mod.substring(2)
@@ -102,20 +96,19 @@ define([
     }
 
     function convert(plus_minus, num, unit, round) {
-        console.log('convert:', plus_minus, num, unit, round)
         if (num && unit) {
             if (plus_minus === '-') {
-                return moment().subtract(num, unit).format(roundPattern[round])
+                return moment(moment().utc().subtract(num, unit).format(roundPattern[round])).unix()
             } else {
-                return moment().add(num, unit).format(roundPattern[round])
+                return moment(moment().utc().add(num, unit).format(roundPattern[round])).unix()
             }
         }
         if (!num && !unit && round) {
             if (round.indexOf('@w') === 0) {
                 var day = parseInt(round.substring(2))
-                return moment().weekday(day).format(roundPattern[round])
+                return moment(moment().utc().weekday(day).format(roundPattern[round])).unix()
             }
-            return moment().format(roundPattern[round])
+            return moment(moment().utc().format(roundPattern[round])).unix()
         }
         return null
     }
