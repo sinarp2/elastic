@@ -11,12 +11,8 @@ define(["jquery",
     "es/eventview",
     "es/fieldview",
     "es/modalview",
-    "es/queryeditor",
     "es/queryexec",
     "es/utils",
-    "ace/ace",
-    "text!../app/Clay/html/es_search.html",
-    "splunkjs/mvc/timerangeview",
     "splunkjs/mvc/searchmanager",
     "splunkjs/mvc/chartview"
 ], function ($,
@@ -25,33 +21,22 @@ define(["jquery",
     EventView,
     FieldView,
     ModalView,
-    QueryEditor,
     queryExec,
     utils,
-    ace,
-    es_search,
-    TimeRangeView,
     SearchManager,
     ChartView) {
 
         return Backbone.View.extend({
 
             bShowFields: true,
-
             qeditor: null,
             eventview: null,
             trview: null,
             tlsearch: null,
             timechart: null,
 
-
             "initialize": function (options) {
                 var vm = this
-                $.get('/custom/Clay/estools/get_eshost').done(function (res) {
-                    vm._esHost = res.host
-                    vm.executeQuery(1, true)
-                })
-
                 Backbone.Events.on('all', function (e) {
                     if (vm.events[e]) {
                         vm.events[e].apply(vm, Array.prototype.slice.call(arguments, 1));
@@ -83,37 +68,6 @@ define(["jquery",
             },
             "render": function () {
                 var vm = this
-
-                $('.dashboard-title').prepend('<i class="icon-search-thin"></i> ')
-                $('.dashboard-body').css('min-height', 0)
-                $('.dashboard-body').css('padding', '0 20px')
-                $(es_search).insertAfter(vm.$el)
-
-                vm.qeditor = new QueryEditor({
-                    el: $('.search-bar-wrapper.shared-searchbar')
-                })
-
-                vm.trview = new TimeRangeView({
-                    id: "example-timerange",
-                    "managerid": "example-search",
-                    preset: "Today",
-                    el: $(".search-timerange")
-                }).render()
-
-                vm.trview.timerange = {
-                    runtime: false,
-                    gte: utils.now('YYYY-MM-DDT00:00:00.000+00:00'),
-                    lte: utils.now('YYYY-MM-DDThh:mm:ss.000+00:00'),
-                    timezone: "+09:00",
-                    earliest_time: "@d",
-                    latest_time: "now"
-                }
-
-                vm.trview.runtimeMod = {
-                    "s": 1000,
-                    "m": 60000,
-                    "h": 3600000
-                }
 
                 vm.tlsearch = new SearchManager({
                     id: "timeline-search",
@@ -262,6 +216,7 @@ define(["jquery",
                 modal.show()
             },
             "printMessage": function (message, type) {
+                console.log('printMessage', message)
                 var html = ''
                 var $msg = $('.message-single.search-results-shared-jobdispatchstatemessage')
                 if (message) {

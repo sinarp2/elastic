@@ -1,23 +1,36 @@
-define(["underscore", "moment"], function (_, moment) {
+define([
+    "underscore",
+    "moment",
+    "es_config"
+], function (
+    _,
+    moment,
+    es_config
+) {
 
     var roundPattern = {
-        "@y": "YYYY-01-01T00:00:00+00:00",
-        "@mon": "YYYY-MM-01T00:00:00+00:00",
-        "@d": "YYYY-MM-DDT00:00:00+00:00",
-        "@h": "YYYY-MM-DDThh:00:00+00:00",
-        "@m": "YYYY-MM-DDThh:mm:00+00:00",
-        "@s": "YYYY-MM-DDThh:mm:ss+00:00",
-        "@w0": "YYYY-MM-DDT00:00:00+00:00",
-        "@w1": "YYYY-MM-DDT00:00:00+00:00",
-        "none": "YYYY-MM-DDThh:mm:ss+00:00"
+        "@y": "YYYY-01-01T00:00:00.000+09:00",
+        "@mon": "YYYY-MM-01T00:00:00.000+09:00",
+        "@d": "YYYY-MM-DDT00:00:00.000+09:00",
+        "@h": "YYYY-MM-DDThh:00:00.000+09:00",
+        "@m": "YYYY-MM-DDThh:mm:00.000+09:00",
+        "@s": "YYYY-MM-DDThh:mm:ss.000+09:00",
+        "@w0": "YYYY-MM-DDT00:00:00.000+09:00",
+        "@w1": "YYYY-MM-DDT00:00:00.000+09:00",
+        "none": "YYYY-MM-DDThh:mm:ss.000+09:00"
     }
 
     return {
         spModify: spModify,
         esModify: esModify,
-        now: now,
         unix: unix,
+        now_utc_epoch: now_utc_epoch,
+        get_timezone: get_timezone,
         timelineInterval: timelineInterval
+    }
+
+    function get_timezone() {
+        return es_config.timezone || "+00:00"
     }
 
     function timelineInterval(data) {
@@ -44,8 +57,12 @@ define(["underscore", "moment"], function (_, moment) {
         return moment(num * 1000).format()
     }
 
-    function now(formatString) {
-        return moment().format(formatString)
+    function now_utc_epoch(millis) {
+        if (millis) {
+            return moment().valueOf()
+        } else {
+            return moment().utc()
+        }
     }
 
     function esModify(input) {
@@ -57,10 +74,10 @@ define(["underscore", "moment"], function (_, moment) {
             return null
         }
         if (_.isNumber(mod)) {
-            return moment(mod * 1000).utc().format()
+            return moment(mod * 1000).format()
         }
         if (mod === 'now' || mod === 'rt' || mod === 'rtnow') {
-            return moment().utc().format()
+            return moment().format()
         }
         if (mod.indexOf('rt') === 0) {
             mod = mod.substring(2)

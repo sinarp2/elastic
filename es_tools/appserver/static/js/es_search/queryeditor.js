@@ -1,5 +1,6 @@
 require.config({
     paths: {
+        es: "../app/Clay/js/es_search",
         text: "../app/Clay/lib/text"
     }
 })
@@ -8,12 +9,23 @@ define([
     "jquery",
     "underscore",
     "backbone",
-    "text!../app/Clay/html/es_queryeditor.html"
-], function ($, _, Backbone, template) {
+    "es_config",
+    "es/utils",
+    "text!../app/Clay/html/es_queryeditor.html",
+    "splunkjs/mvc/timerangeview",
+    "splunkjs/mvc/simplexml/ready!"
+], function (
+    $,
+    _,
+    Backbone,
+    es_config,
+    utils,
+    template,
+    TimeRangeView
+) {
 
     var view = Backbone.View.extend({
         "initialize": function () {
-            this.render();
         },
         "getValue": function () {
             return this.editor.getValue()
@@ -26,6 +38,7 @@ define([
         "render": function () {
             this.$el.html(_.template(template, {}));
             this.setupEditor()
+            this.setupTimerange()
             return this
         },
         "setupEditor": function () {
@@ -82,6 +95,36 @@ define([
 
             setInterval(saveQuery, 500, editor, this.canStore)
             this.editor = editor
+        },
+        "setupTimerange": function () {
+            this.trview = new TimeRangeView({
+                id: "es-timerange-" + utils.now_utc_epoch(true),
+                preset: "Today",
+                el: $(".search-timerange")
+            })
+
+            this.trview.render()
+
+            this.trview.timerange = {
+                runtime: false,
+                gte: utils.now_utc_epoch(),
+                lte: utils.now_utc_epoch(),
+                timezone: utils.get_timezone(),
+                earliest_time: "@d",
+                latest_time: "now"
+            }
+
+            this.trview.runtimeMod = {
+                "s": 1000,
+                "m": 60000,
+                "h": 3600000
+            }
+        },
+        "getValue": function () {
+            return this.editor.getValue()
+        },
+        "getTimerange": function () {
+            return this.trview.timerange
         }
     })
 
@@ -107,7 +150,7 @@ define([
     }
 
     function onEnterEditor(editor) {
-        Backbone.Events.trigger('query:start')
+        Backbone.Events.trigger('editor:search', editor.getValue())
     }
 
     return view

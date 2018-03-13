@@ -1,0 +1,29 @@
+<div class="root">
+    <div class="query">
+        <div class="bool">
+            <ul class="must">
+                <div class="match"></div>
+            </ul>
+            <ul class="should"></ul>
+            <ul class="must_not"></div>
+            <ul class="filter">
+                <div class="range">
+                    <div class="timestamp">
+                        <div class="gte" data-gte="<%=gte%>"></div>
+                        <div class="lte" data-gte="<%=lte%>"></div>
+                        <div class="time_zone" data-gte="<%=timezone%>"></div>
+                    </div>
+                </div>
+            </ul>
+        </div>
+    </div>
+    <div class="size" data-size="<%=size%>"></div>
+    <div class="from" data-size="<%=form%>"></div>
+    <ul class="sort">
+        <li>
+            <div class="timestamp">
+                <dic class="order" data-order="<%=order%>"></dic>
+            </div>
+        </li>
+    </ul>
+</div>
