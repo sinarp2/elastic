@@ -10,39 +10,41 @@ define([
     "underscore",
     "backbone",
     "moment",
-    "es/queryexec",
-    "es/fieldview",
+    "es_config",
     "text!../app/Clay/html/es_eventview.html"
 ], function (
     $,
     _,
     Backbone,
     moment,
-    QueryExec,
-    Fieldview,
+    es_config,
     eventview
 ) {
 
         return Backbone.View.extend({
             el: '.search-results-eventspane-controls',
             fieldview: null,
+            bShowFields: true,
             "initialize": function () {
                 this.on('search:start', this.search, this)
-                this.fieldview = new FieldView()
+            },
+            "get_model": function () {
+                return {
+                    qm: this.qm,
+                    q: this.q
+                }
             },
             "events": {
                 "click #btn_hide_fields": function () {
                     this.bShowFields = false
-                    this.onShowFields(false)
-                    this.showFields(false)
+                    this.showFields()
                 },
                 "click #btn_all_fields": function () {
                     this.showAllFields(true)
                 },
                 "click .search-results-eventspane-controls-showfield": function () {
                     this.bShowFields = true
-                    this.onShowFields(true)
-                    this.showFields(true)
+                    this.showFields()
                 },
                 "click ul.ulpager > li > a": function (e) {
                     var $a = $(e.target).closest('a')
@@ -51,34 +53,46 @@ define([
                     if (gotoPage === currPage) {
                         return
                     }
+                    this.qm.setFrom(this.q, gotoPage)
+                    this.goToPage()
                 }
             },
             "render": function (model) {
+                console.log('render', model)
                 var vm = this
                 var compile = _.template(eventview)
                 var html = compile(model)
                 vm.$el.html(html)
+                Backbone.Events.trigger('eventview:rendered')
+                this.showFields()
             },
             "search": function (qm, q) {
+                this.qm = $.extend(true, {}, qm)
+                this.q = $.extend(true, {}, q)
+                this.goToPage()
+            },
+            "goToPage": function () {
                 var vm = this
-                var onSuccess = function(res) {
-                    vm.dataHandler(res)
+                var onSuccess = function (res) {
+                    vm.dataHandler(res, vm.q.get("from"))
                 }
-                var onError = function(e) {
+                var onError = function (e) {
                     vm.errorHandler(e)
                 }
-                $.ajax("/custom/Clay/estools/esapi", {
+                console.log('eventview query', vm.q.toJSON())
+                $.ajax(es_config.esapi, {
                     data: {
-                        method: qm.get("method"),
-                        uri: qm.get("uri"),
-                        data: JSON.stringify(q)
+                        method: vm.qm.get("method"),
+                        uri: vm.qm.get("uri"),
+                        data: JSON.stringify(vm.q)
                     },
                     success: onSuccess,
                     error: onError,
                     dataType: "json"
                 })
             },
-            "dataHandler": function (res) {
+            "dataHandler": function (res, from) {
+                console.log('datahandler', res, from)
                 var jsonResult = JSON.parse(res)
                 if (jsonResult.hits && jsonResult.hits.hits) {
                     var hits = jsonResult.hits
@@ -86,11 +100,11 @@ define([
                         return
                     }
                     var model = {
-                        "hits": hits,
+                        "hits": hits.hits,
                         "pager": {
                             "total": hits.total,
                             "size": hits.hits.length,
-                            "from": hits.from
+                            "from": from
                         },
                         "filter": {
                             "date": function (timestamp, format) {
@@ -102,8 +116,11 @@ define([
                     this.render(model)
                 }
             },
-            "showFields": function (bShow) {
-                if (bShow) {
+            "errorHandler": function (e) {
+                console.log(e)
+            },
+            "showFields": function () {
+                if (this.bShowFields) {
                     $('.search-results-eventspane-fieldsviewer').css('margin-left', '0')
                     $('.shared-eventsviewer-lazyeventsviewer').css('margin-left', '240px')
                     $('.shared-controls-syntheticselectcontrol').css('margin-left', '0')

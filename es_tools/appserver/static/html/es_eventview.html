@@ -3,6 +3,7 @@
         <i class="icon-chevron-right icon-no-underline"></i>
         <span>Show Fields</span>
     </a>
+    <!--
     <div class="btn-group shared-controls-syntheticselectcontrol control-default">
         <a class="dropdown-toggle btn-pill" href="#">
             <i class=" icon-large"></i>
@@ -42,6 +43,7 @@
             </a>
         </div>
     </div>
+    -->
     <div class="control btn-group shared-controls-syntheticselectcontrol control-default">
         <a class="dropdown-toggle btn-pill" href="#">
             <i class=" icon-large"></i>
@@ -73,6 +75,7 @@
             <div class="dropdown-footer"></div>
         </div>
     </div>
+
     <div class="pagination shared-searchresultspaginator pull-right">
         <%
             var totalPages = Math.ceil(pager.total / pager.size)
@@ -155,7 +158,7 @@
                         </tr>
                     </thead>
                     <tbody class="shared-eventsviewer-list-body">
-                        <%_.each(hits.hits, function(hit, idx) {%>
+                        <%_.each(hits, function(hit, idx) {%>
                             <tr tabindex="-1" class="tabbable-list-row shared-eventsviewer-list-body-row" es-repeat>
                                 <!--Line breaks intentionally removed to fix obscure IE9 bug with tables-->
                                 <td tabindex="0" class="expands">

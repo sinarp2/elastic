@@ -34,7 +34,7 @@ define([
                 runtime: false,
                 gte: utils.sp_modify("@d"),
                 lte: utils.sp_modify("now"),
-                timezone: utils.get_timezone(),
+                timezone: es_config.timezone,
                 earliest_time: "@d",
                 latest_time: "now"
             },
@@ -113,7 +113,7 @@ define([
                 var vm = this
 
                 vm.trview = new TimeRangeView({
-                    id: "es-timerange-" + utils.now_utc_epoch(true),
+                    id: "es-timerange",
                     preset: "Today",
                     el: $(".search-timerange")
                 })

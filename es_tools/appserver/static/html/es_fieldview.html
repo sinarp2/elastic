@@ -37,15 +37,14 @@
         </li>
     </ol>
     -->
-    <h6>Interesting Fields</h6>
+    <h6>Fields</h6>
     <ol class="interesting-fields-list">
-        <%_.each(fields, function(obj, key) {
-            cardinality = aggs[key].value %>
+        <%_.each(fields, function(obj, key) {%>
         <li>
             <a href="#" data-field-name="<%=key%>" class="fields-info">
                 <span class="fields-type font-icon"><% print(dataType(obj.type)) %></span>
                 <span class="field-name"><%=key%></span>
-                <span class="field-count numeric"><% print((cardinality > 100) ? '100+': cardinality) %></span>
+                <span class="field-count numeric"></span>
             </a>
         </li>
         <%})%>

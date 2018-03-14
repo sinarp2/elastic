@@ -26,11 +26,12 @@ define([
             smgr: null,
             chart: null,
             "initialize": function () {
-                this.on('search:start', this.search, this)
-                this.smgr = new SearchManager({
+                var vm = this
+                vm.on('search:start', vm.search, this)
+                vm.smgr = new SearchManager({
                     id: "timeline-search"
                 })
-                this.chart = new ChartView({
+                vm.chart = new ChartView({
                     id: "es-search-chart",
                     managerid: "timeline-search",
                     type: "column",
@@ -43,21 +44,35 @@ define([
                     "charting.axisLabelsY2.axisVisibility": "show",
                     "charting.chart.columnSpacing": "0",
                     "charting.chart.seriesSpacing": "0",
-                    "refresh.auto.interval": "5",
                     el: $(".timechart-content")
+                })
+
+                vm.chart.on('selection', function (e) {
+                    Backbone.Events.trigger('timeline:selection', e, vm)
+                })
+
+                vm.chart.on('clicked:chart', function (e) {
+                    e.preventDefault()
+                    Backbone.Events.trigger('timeline:click', e, vm)
                 })
             },
             "render": function () {
 
             },
             "search": function (qm, q) {
+                var ts = utils.get_timerange(q.get("query")['bool']['filter'])
                 var tq = {
                     "size": 0,
                     "aggs": {
                         "count_by_timestamp": {
                             "date_histogram": {
                                 "field": "@timestamp",
-                                "interval": utils.timelineInterval(q.get("query")['bool']['filter'])
+                                "interval": utils.histo_interval(ts),
+                                "min_doc_count": 0,
+                                "extended_bounds": {
+                                    "min": ts.gte,
+                                    "max": ts.lte
+                                }
                             }
                         }
                     },

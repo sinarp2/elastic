@@ -107,11 +107,21 @@ define([
                 return q
             },
             validate: function (attrs, options) {
-                if (!attrs.method || !attrs.uri || !attrs.json) {
-                    return "Invalid query statement."
+                // isValid 호출이 되면 자동 호출됨.
+                if (!attrs.method) {
+                    return "검색 문장은 GET으로 시작하여야 합니다."
+                }
+                if (!attrs.uri) {
+                    return "검색할 인덱스를 지정하세요."
+                }
+                if (attrs.uri.indexOf('_search') < 0) {
+                    return "[인덱스명/_search] 형태로 사용하세요."
+                }
+                if (!attrs.json) {
+                    return "검색에 필요한 문장이 옳바르지 않습니다."
                 }
                 if (!attrs.json.query) {
-                    return "Query statement not found."
+                    return "검색에 필요한 query 문장이 없습니다."
                 }
             },
             isQueryString: function (jo) {
@@ -173,7 +183,6 @@ define([
                 var o = this.extend_model(q.get("query"), {
                     "bool": boolq
                 })
-                console.log('query', o)
                 q.set("query", o)
             },
             hasTimerange: function (jo) {
@@ -212,7 +221,16 @@ define([
                 } else {
                     range["range"]["@timestamp"]["lte"] = lte
                 }
-                qo.get("query")["bool"]["filter"].push(range)
+                var filter_arr = qo.get("query")["bool"]["filter"]
+                var tmp = []
+                for (var i = 0; i < filter_arr.length; i++) {
+                    var obj = filter_arr[i]
+                    if (!obj["range"] || !obj["range"]["@timestamp"]) {
+                        tmp.push(obj)
+                    }
+                }
+                tmp.push(range)
+                qo.get("query")["bool"]["filter"] = tmp
             },
             setFrom: function (qo, page) {
                 var size = this.get("size")
