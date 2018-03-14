@@ -67,6 +67,7 @@ define([
                 this.showFields()
             },
             "search": function (qm, q) {
+                // this.$el.html('')
                 this.qm = $.extend(true, {}, qm)
                 this.q = $.extend(true, {}, q)
                 this.goToPage()
@@ -79,7 +80,7 @@ define([
                 var onError = function (e) {
                     vm.errorHandler(e)
                 }
-                console.log('eventview query', vm.q.toJSON())
+                console.log('query', vm.q.toJSON())
                 $.ajax(es_config.esapi, {
                     data: {
                         method: vm.qm.get("method"),
@@ -92,7 +93,7 @@ define([
                 })
             },
             "dataHandler": function (res, from) {
-                console.log('datahandler', res, from)
+                // console.log('datahandler', res, from)
                 var jsonResult = JSON.parse(res)
                 if (jsonResult.hits && jsonResult.hits.hits) {
                     var hits = jsonResult.hits

@@ -46,7 +46,6 @@ define([
                     "charting.chart.seriesSpacing": "0",
                     el: $(".timechart-content")
                 })
-
                 vm.chart.on('selection', function (e) {
                     Backbone.Events.trigger('timeline:selection', e, vm)
                 })

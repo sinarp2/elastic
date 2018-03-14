@@ -117,32 +117,36 @@ require([
         })
 
         Backbone.Events.on('timeline:selection', function (e) {
-            if (timeline.isFirst) {
-                timeline.isFirst = null
-                return
-            }
-            var gte = parseInt(e.data.start) * 1000
-            var lte = parseInt(e.data.end) * 1000
-            var qm = eventview.get_model().qm
-            var q = eventview.get_model().q
+            e.preventDefault()
+            console.log('selected', e)
+            // if (timeline.isFirst) {
+            //     timeline.isFirst = null
+            //     return
+            // }
+            // var gte = parseInt(e.data.start) * 1000
+            // var lte = parseInt(e.data.end) * 1000
+            // var qm = eventview.get_model().qm
+            // var q = eventview.get_model().q
             
-            qm.setTimerange(q, gte, lte)
-            qm.setFrom(q, 1)
-            // timeline.trigger('search:start', qm, q)
-            eventview.trigger('search:start', qm, q)
-            fieldview.trigger('search:start', qm, q)
+            // qm.setTimerange(q, gte, lte)
+            // qm.setFrom(q, 1)
+            // // timeline.trigger('search:start', qm, q)
+            // eventview.trigger('search:start', qm, q)
+            // fieldview.trigger('search:start', qm, q)
         })
 
         Backbone.Events.on('timeline:click', function (e) {
-            var gte = parseInt(e.value) * 1000
-            var lte = gte + 3650000
-            var qm = eventview.get_model().qm
-            var q = eventview.get_model().q
+            e.preventDefault()
+            console.log('clicked', e)
+            // var gte = parseInt(e.value) * 1000
+            // var lte = gte + 3650000
+            // var qm = eventview.get_model().qm
+            // var q = eventview.get_model().q
             
-            qm.setTimerange(q, gte, lte)
-            qm.setFrom(q, 1)
-            timeline.trigger('search:start', qm, q)
-            eventview.trigger('search:start', qm, q)
-            fieldview.trigger('search:start', qm, q)
+            // qm.setTimerange(q, gte, lte)
+            // qm.setFrom(q, 1)
+            // timeline.trigger('search:start', qm, q)
+            // eventview.trigger('search:start', qm, q)
+            // fieldview.trigger('search:start', qm, q)
         })
     })
