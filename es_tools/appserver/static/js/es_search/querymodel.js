@@ -78,15 +78,7 @@ define([
                             "must": [],
                             "should": [],
                             "must_not": [],
-                            "filter": [{
-                                "range": {
-                                    "@timestamp": {
-                                        "gte": 0,
-                                        "lte": 0,
-                                        "time_zone": "+00:00"
-                                    }
-                                }
-                            }]
+                            "filter": []
                         }
                     },
                     "from": 0,
@@ -130,6 +122,13 @@ define([
             convertToBoolQuery: function (jo, q) {
                 if (!jo.query['bool']) {
                     if (this.hasTimerange(jo.query)) {
+                        // range @timestamp 쿼리
+                        // "query": {
+                        //     "range": {
+                        //         "@timestamp": {
+                        //         }
+                        //     }
+                        // }
                         this.set({
                             'isUserRange': true
                         })
@@ -142,6 +141,8 @@ define([
                         })
                         q.set("query", o)
                     } else {
+                        // match, match_all, term 쿼리
+                        // must에 추가하여 병합한다.
                         var o = this.extend_model(q.get("query"), {
                             "bool": {
                                 "must": [
@@ -161,7 +162,7 @@ define([
                     this.hasTimerange(boolq['filter'])) {
                     var o = this.extend_model(q.get("query"), {
                         "bool": {
-                            "filter": {}
+                            "filter": []
                         }
                     })
                     q.set("query", o)
@@ -172,6 +173,7 @@ define([
                 var o = this.extend_model(q.get("query"), {
                     "bool": boolq
                 })
+                console.log('query', o)
                 q.set("query", o)
             },
             hasTimerange: function (jo) {
@@ -193,26 +195,24 @@ define([
             extend_model: function (obj1, obj2) {
                 return $.extend(true, {}, obj1, obj2)
             },
-            setTimerange: function (qo, gte, lte) {
-                if (!this.isUserTimerange()) {
+            setTimerange: function (qo, gte, lte, latest_time) {
+                if (this.isUserTimerange()) {
                     return
                 }
-                var o = $.extend(true, {}, qo.get("query"), {
-                    "bool": {
-                        "filter": [
-                            {
-                                "range": {
-                                    "@timestamp": {
-                                        "gte": gte,
-                                        "lte": lte,
-                                        "time_zone": "+00:00"
-                                    }
-                                }
-                            }
-                        ]
+                var range = {
+                    "range": {
+                        "@timestamp": {
+                            "gte": gte,
+                            "time_zone": "+00:00"
+                        }
                     }
-                })
-                qo.set("query", o)
+                }
+                if (_.isString(latest_time) && latest_time.indexOf("@") > -1) {
+                    range["range"]["@timestamp"]["lt"] = lte
+                } else {
+                    range["range"]["@timestamp"]["lte"] = lte
+                }
+                qo.get("query")["bool"]["filter"].push(range)
             },
             setFrom: function (qo, page) {
                 var size = this.get("size")

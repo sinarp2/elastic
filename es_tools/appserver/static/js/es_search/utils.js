@@ -31,8 +31,7 @@ define([
         return es_config.timezone || "+00:00"
     }
 
-    function timelineInterval(data) {
-        var filter = data['query']['bool']['filter']
+    function timelineInterval(filter) {
         var ts, gte, lte, gap
         if (_.isArray(filter)) {
             _.find(filter, function (obj) {
@@ -46,9 +45,14 @@ define([
         }
         gte = ts['gte'] || ts['gt']
         lte = ts['lte'] || ts['lt']
-        gap = moment(gte).diff(moment(lte), 'days')
-        console.log('time gap', gap, gte, lte)
-        return '1d'
+        gap = (lte - gte) / 60 / 60
+        if (gap < 24) {
+            return '1m'
+        } else if (23 < gap < 4380) {
+            return '1d'
+        } else if (gap > 4380) {
+            return 'month'
+        }
     }
 
     function now_utc_epoch(millis) {
@@ -71,7 +75,7 @@ define([
             return mod
         }
         if (mod === 'now' || mod === 'rt' || mod === 'rtnow') {
-            return moment().unix()
+            return moment().valueOf()
         }
         if (mod.indexOf('rt') === 0) {
             mod = mod.substring(2)
@@ -98,17 +102,17 @@ define([
     function convert(plus_minus, num, unit, round) {
         if (num && unit) {
             if (plus_minus === '-') {
-                return moment(moment().utc().subtract(num, unit).format(roundPattern[round])).unix()
+                return moment(moment().utc().subtract(num, unit).format(roundPattern[round])).valueOf()
             } else {
-                return moment(moment().utc().add(num, unit).format(roundPattern[round])).unix()
+                return moment(moment().utc().add(num, unit).format(roundPattern[round])).valueOf()
             }
         }
         if (!num && !unit && round) {
             if (round.indexOf('@w') === 0) {
                 var day = parseInt(round.substring(2))
-                return moment(moment().utc().weekday(day).format(roundPattern[round])).unix()
+                return moment(moment().utc().weekday(day).format(roundPattern[round])).valueOf()
             }
-            return moment(moment().utc().format(roundPattern[round])).unix()
+            return moment(moment().utc().format(roundPattern[round])).valueOf()
         }
         return null
     }
