@@ -10,6 +10,7 @@ define([
 
     return {
         epoch: epoch,
+        epoch_millis: epoch_millis,
         sp_modify: sp_modify,
         histo_interval: histo_interval,
         get_timerange: get_timerange
@@ -57,6 +58,10 @@ define([
         } else {
             return moment().add(val, mod).unix()
         }
+    }
+
+    function epoch_millis(val, mod) {
+        return moment(epoch(val, mod)).valudOf()
     }
 
     function es_modify(input) {

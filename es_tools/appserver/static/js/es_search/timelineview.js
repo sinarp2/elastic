@@ -148,26 +148,26 @@ define([
                 }]
             }
             $.extend(true, tq.query, q.get("query"))
-            console.log('timequery', tq)
-            // var onSuccess = function (res) {
-            //     vm.render(res)
-            // }
-            // var onError = function (e) {
-            //     vm.errorHandler(e)
-            // }
-            // $.ajax(es_config.esapi, {
-            //     data: {
-            //         method: 'GET',
-            //         uri: qm.get("uri"),
-            //         data: JSON.stringify(tq)
-            //     },
-            //     success: onSuccess,
-            //     error: onError,
-            //     dataType: "json"
-            // })
+            console.log('timequery', ts.gte, ts.lte, utils.histo_interval(ts))
+            var onSuccess = function (res) {
+                vm.render(res)
+            }
+            var onError = function (e) {
+                vm.errorHandler(e)
+            }
+            $.ajax(es_config.esapi, {
+                data: {
+                    method: 'GET',
+                    uri: qm.get("uri"),
+                    data: JSON.stringify(tq)
+                },
+                success: onSuccess,
+                error: onError,
+                dataType: "json"
+            })
         },
         errorHandler: function (e) {
-
+            console.log(e)
         }
     })
 

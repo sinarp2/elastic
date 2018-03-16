@@ -78,8 +78,8 @@ require([
         qeditor.render()
 
         timeline = new TimelineView()
-        // eventview = new EventView()
-        // fieldview = new FieldView()
+        eventview = new EventView()
+        fieldview = new FieldView()
 
         var text = qeditor.getValue()
         if (text) {
@@ -98,12 +98,12 @@ require([
         }
         var q = qm.get_model()
         var tr = qeditor.getTimerange()
-        qm.setTimerange(q, tr.gte, tr.lte, tr.isLTE)
+        qm.setTimerange(q, tr.gte, tr.lte)
         qm.setFrom(q, page)
 
         timeline.trigger('search:start', qm, q)
-        // eventview.trigger('search:start', qm, q)
-        // fieldview.trigger('search:start', qm, q)
+        eventview.trigger('search:start', qm, q)
+        fieldview.trigger('search:start', qm, q)
     }
 
     Backbone.Events.on('editor:search', function (text) {

@@ -206,7 +206,7 @@ define([
             extend_model: function (obj1, obj2) {
                 return $.extend(true, {}, obj1, obj2)
             },
-            setTimerange: function (qo, gte, lte, latest_time) {
+            setTimerange: function (qo, gte, lte) {
                 if (this.isUserTimerange()) {
                     return
                 }
@@ -214,15 +214,16 @@ define([
                     "range": {
                         "@timestamp": {
                             "gte": gte,
+                            "lte": lte,
                             "time_zone": utils.timezone
                         }
                     }
                 }
-                if (_.isString(latest_time) && latest_time.indexOf("@") > -1) {
-                    range.range["@timestamp"].lt = lte
-                } else {
-                    range.range["@timestamp"].lte = lte
-                }
+                // if (_.isString(latest_time) && latest_time.indexOf("@") > -1) {
+                //     range.range["@timestamp"].lt = lte
+                // } else {
+                //     range.range["@timestamp"].lte = lte
+                // }
                 var filter_arr = qo.get("query").bool.filter
                 var tmp = []
                 for (var i = 0; i < filter_arr.length; i++) {

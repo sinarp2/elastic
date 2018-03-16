@@ -129,11 +129,9 @@ define([
             },
             "updateTimerange": function () {
                 var tr = this.timerange
-                var gte = this.trview.val().earliest_time
-                var lte = this.trview.val().latest_time
-                
-                tr.earliest_time = gte || utils.epoch(-1, 'y')
-                tr.latest_time = lte || utils.epoch()
+                var gte = this.trview.val().earliest_time || utils.epoch(-1, 'y')
+                var lte = this.trview.val().latest_time || utils.epoch()
+
                 tr.isRuntime = (gte && !_.isNumber(gte) && gte.indexOf('rt') === 0)
                 
                 if (gte === 'rt' && lte === 'rt') {
