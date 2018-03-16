@@ -8,124 +8,131 @@ define([
     es_config
 ) {
 
-        var roundPattern = {
-            "@y": "YYYY-01-01T00:00:00.000",
-            "@mon": "YYYY-MM-01T00:00:00.000",
-            "@d": "YYYY-MM-DDT00:00:00.000",
-            "@h": "YYYY-MM-DDThh:00:00.000",
-            "@m": "YYYY-MM-DDThh:mm:00.000",
-            "@s": "YYYY-MM-DDThh:mm:ss.000",
-            "@w0": "YYYY-MM-DDT00:00:00.000",
-            "@w1": "YYYY-MM-DDT00:00:00.000",
-            "none": "YYYY-MM-DDThh:mm:ss.000"
+    return {
+        epoch: epoch,
+        sp_modify: sp_modify,
+        histo_interval: histo_interval,
+        get_timerange: get_timerange
+    }
+
+    function get_timerange(filter) {
+        var ts, gte, lte
+        if (_.isArray(filter)) {
+            _.find(filter, function (obj) {
+                if (obj.range) {
+                    ts = obj.range['@timestamp']
+                    return true
+                }
+            })
+        } else {
+            ts = filter.range['@timestamp']
         }
-
-        _.each(roundPattern, function (val, key) {
-            val = val + es_config.timezone
-        })
-
+        gte = ts.gte || ts.gt
+        lte = ts.lte || ts.lt
         return {
-            sp_modify: sp_modify,
-            histo_interval: histo_interval,
-            get_timerange: get_timerange
+            gte: gte,
+            lte: lte
         }
+    }
 
-        function get_timerange(filter) {
-            var ts, gte, lte
-            if (_.isArray(filter)) {
-                _.find(filter, function (obj) {
-                    if (obj['range']) {
-                        ts = obj['range']['@timestamp']
-                        return true
-                    }
-                })
-            } else {
-                ts = filter['range']['@timestamp']
-            }
-            gte = ts['gte'] || ts['gt']
-            lte = ts['lte'] || ts['lt']
-            return {
-                gte: gte,
-                lte: lte
+    function histo_interval(ts) {
+        var r = ts.lte - ts.gte
+        var ux = [1000, 60, 60, 24, 30, 12]
+        var ul = ['1s', '1m', '1h', '1d', '1M', '1y']
+        var max = 240
+        for (var i = 0; i < ux.length; i++) {
+            r = parseInt(r / ux[i]) || 1
+            if (r <= max) {
+                return ul[i]
             }
         }
+    }
 
-        function histo_interval(ts) {
-            var gte, lte, gap, interval
-            gte = ts.gte
-            lte = ts.lte
-            gap = (lte - gte) / 60 / 60 / 1000
-            if (gap < 24) {
-                interval = '1h'
-            } else if (23 < gap && gap < (60 * 24)) {
-                interval = '1d'
-            } else if (gap > (60 * 24)) {
-                interval = '1M'
-            } else {
-                interval = 'month'
-            }
-            return interval
+    function epoch(val, mod) {
+        if (!val) {
+            return moment().unix()
         }
-
-        function now_utc_epoch(millis) {
-            if (millis) {
-                return moment().valueOf()
-            } else {
-                return moment().unix()
-            }
+        if (val < 0) {
+            return moment().subtract(Math.abs(val), mod).unix()
+        } else {
+            return moment().add(val, mod).unix()
         }
+    }
 
-        function esModify(input) {
-            return moment(input)
-        }
+    function es_modify(input) {
+        return moment(input)
+    }
 
-        function sp_modify(mod) {
-            if (!mod) {
-                return null
-            }
-            if (_.isNumber(mod)) {
-                return mod
-            }
-            if (mod === 'now' || mod === 'rt' || mod === 'rtnow') {
-                return moment().valueOf()
-            }
-            if (mod.indexOf('rt') === 0) {
-                mod = mod.substring(2)
-            }
-            if (mod.indexOf('@') === 0) {
-                return convert(null, null, null, mod)
-            }
-            var match = mod.match(/(-|\+)(\d+)(mon|[ydhmsw])($|@mon|@[ydhmsw]|@w[0-7])$/)
-            if (!match) {
-                return null
-            }
-            var plus_minus = match[1]
-            var num = match[2]
-            var unit = match[3]
-            var round = match[4] || 'none'
-            try {
-                return convert(plus_minus, num, unit, round)
-            } catch (e) {
-                console.log('convert error', e)
-                return null
-            }
-        }
-
-        function convert(plus_minus, num, unit, round) {
-            if (num && unit) {
-                if (plus_minus === '-') {
-                    return moment(moment().subtract(num, unit).format(roundPattern[round])).valueOf()
-                } else {
-                    return moment(moment().add(num, unit).format(roundPattern[round])).valueOf()
-                }
-            }
-            if (!num && !unit && round) {
-                if (round.indexOf('@w') === 0) {
-                    var day = parseInt(round.substring(2))
-                    return moment(moment().weekday(day).format(roundPattern[round])).valueOf()
-                }
-                return moment(moment().format(roundPattern[round])).valueOf()
-            }
+    function sp_modify(mod) {
+        if (!mod) {
             return null
         }
-    })
+        if (_.isNumber(mod)) {
+            return mod * 1000
+        }
+        if (mod === 'now' || mod === 'rt' || mod === 'rtnow') {
+            return moment().valueOf()
+        }
+        if (mod.indexOf('rt') === 0) {
+            mod = mod.substring(2)
+        }
+        if (mod.indexOf('@') === 0) {
+            return convert(null, null, null, mod)
+        }
+        var match = mod.match(/([-|\+]?)([0-9]+)([a-z]+)($|@[a-z]+)/)
+        if (!match) {
+            return null
+        }
+        var plus_minus = match[1]
+        var num = match[2]
+        var unit = match[3]
+        var round = match[4]
+        try {
+            return convert(plus_minus, num, unit, round)
+        } catch (e) {
+            console.log('convert error', e)
+            return moment().valueOf()
+        }
+    }
+
+    function convert(plus_minus, num, unit, round) {
+        console.log('convert', plus_minus, num, unit, round)
+        var timestamp = 0
+        if (num && unit) {
+            unit = unit.replace('mon', 'M')
+            if (plus_minus === '-') {
+                timestamp = moment().subtract(num, unit).valueOf()
+            } else {
+                timestamp = moment().add(num, unit).valueOf()
+            }
+        } else {
+            timestamp = moment().valueOf()
+        }
+
+        if (round) {
+            round = round.replace('@', '')
+            round = round.replace('d', 'D')
+            round = round.replace('mon', 'M')
+            var m = moment(timestamp)
+            var round_pattern = ['ms', 's', 'm', 'h', 'D', 'M', 'y']
+            var round_start = {
+                'ms': 0,
+                's': 0,
+                'm': 0,
+                'h': 0,
+                'D': 1,
+                'M': 0
+            }
+            _.find(round_pattern, function (pattern) {
+                if (round !== pattern) {
+                    console.log(pattern)
+                    m = m.set(pattern, round_start[pattern])
+                    return false
+                }
+                return true
+            })
+            return m.valueOf()
+        }
+        return timestamp
+    }
+})

@@ -9,12 +9,14 @@ define([
     "jquery",
     "underscore",
     "backbone",
-    "es_config"
+    "es_config",
+    "es/utils"
 ], function (
     $,
     _,
     Backbone,
-    es_config
+    es_config,
+    utils
 ) {
 
         var Query = Backbone.Model.extend({
@@ -191,11 +193,11 @@ define([
                 }
                 if (_.isArray(jo)) {
                     var range = _.find(jo, function (jo) {
-                        return (jo['range'] && jo['range']['@timestamp'])
+                        return (jo.range && jo.range['@timestamp'])
                     })
                     return range
                 } else {
-                    return (jo['range'] && jo['range']['@timestamp'])
+                    return (jo.range && jo.range['@timestamp'])
                 }
             },
             isUserTimerange: function () {
@@ -212,25 +214,25 @@ define([
                     "range": {
                         "@timestamp": {
                             "gte": gte,
-                            "time_zone": "+00:00"
+                            "time_zone": utils.timezone
                         }
                     }
                 }
                 if (_.isString(latest_time) && latest_time.indexOf("@") > -1) {
-                    range["range"]["@timestamp"]["lt"] = lte
+                    range.range["@timestamp"].lt = lte
                 } else {
-                    range["range"]["@timestamp"]["lte"] = lte
+                    range.range["@timestamp"].lte = lte
                 }
-                var filter_arr = qo.get("query")["bool"]["filter"]
+                var filter_arr = qo.get("query").bool.filter
                 var tmp = []
                 for (var i = 0; i < filter_arr.length; i++) {
                     var obj = filter_arr[i]
-                    if (!obj["range"] || !obj["range"]["@timestamp"]) {
+                    if (!obj.range || !obj.range["@timestamp"]) {
                         tmp.push(obj)
                     }
                 }
                 tmp.push(range)
-                qo.get("query")["bool"]["filter"] = tmp
+                qo.get("query").bool.filter = tmp
             },
             setFrom: function (qo, page) {
                 var size = this.get("size")

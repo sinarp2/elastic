@@ -121,6 +121,7 @@ define([
                 vm.trview.render()
 
                 vm.trview.on("change", function (e) {
+                    console.log('timerange', e)
                     // 재검색 들어감.
                     vm.updateTimerange()
                     Backbone.Events.trigger("timerange:change", e)
@@ -130,11 +131,11 @@ define([
                 var tr = this.timerange
                 var gte = this.trview.val().earliest_time
                 var lte = this.trview.val().latest_time
-
-                tr.earliest_time = gte
-                tr.latest_time = lte
+                
+                tr.earliest_time = gte || utils.epoch(-1, 'y')
+                tr.latest_time = lte || utils.epoch()
                 tr.isRuntime = (gte && !_.isNumber(gte) && gte.indexOf('rt') === 0)
-
+                
                 if (gte === 'rt' && lte === 'rt') {
                     // runtime
                     tr.gte = 0
@@ -156,9 +157,6 @@ define([
                         tr.timeout = (num * this.runtimeMod[m[2]])
                     }
                 }
-            },
-            "getValue": function () {
-                return this.editor.getValue()
             },
             "getTimerange": function () {
                 return this.timerange
